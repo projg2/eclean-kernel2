@@ -111,6 +111,15 @@ std::string DirectoryStream::path() const
 {
 	return path_ + "/" + filename();
 }
+	
+RelativePath DirectoryStream::relative_path() const
+{
+#if defined(HAVE_OPENAT)
+	return {dirfd(dir_), filename()};
+#else
+	return {-1, path()};
+#endif
+}
 
 bool DirectoryStream::is_regular_file() const
 {

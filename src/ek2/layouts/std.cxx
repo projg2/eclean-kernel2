@@ -9,7 +9,10 @@
 
 #include "ek2/layouts/std.h"
 
+#include "ek2/files.h"
+
 #include <iostream>
+#include <memory>
 
 #include <cstring>
 
@@ -38,7 +41,10 @@ bool StdLayout::find_kernels()
 		if (!dir_.is_regular_file())
 			continue;
 
-		std::cerr << dir_.path() << std::endl;
+		std::shared_ptr<File> f;
+		f = get_file_by_magic(dir_.relative_path());
+		if (f)
+			std::cerr << dir_.path() << std::endl;
 	}
 
 	if (dir_.bad())

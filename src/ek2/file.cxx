@@ -8,3 +8,8 @@
 #endif
 
 #include "ek2/file.h"
+
+File::File(RelativePath&& path)
+	: path_(std::move(path))
+{
+}

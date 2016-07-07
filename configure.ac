@@ -6,8 +6,9 @@ AM_INIT_AUTOMAKE([1.6 foreign dist-bzip2 subdir-objects])
 
 AC_LANG([C++])
 AC_PROG_CXX
+AC_SYS_LARGEFILE
 
-AC_CHECK_FUNCS([fstatat lstat])
+AC_CHECK_FUNCS([fstatat lstat openat])
 AC_STRUCT_DIRENT_D_TYPE
 
 AC_CONFIG_HEADERS([config.h])

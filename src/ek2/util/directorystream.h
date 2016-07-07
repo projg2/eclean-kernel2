@@ -8,6 +8,8 @@
 #ifndef EK2_UTIL_DIRECTORY_H
 #define EK2_UTIL_DIRECTORY_H 1
 
+#include "ek2/util/relativepath.h"
+
 #include <string>
 
 extern "C"
@@ -72,8 +74,10 @@ public:
 
 	// filename of the current file
 	std::string filename() const;
-	// full path to the current file
+	// absolute path to the current file
 	std::string path() const;
+	// RelativePath referencing the current file on top of open directory
+	RelativePath relative_path() const;
 	// check if the current file is a regular file (not a dir, symlink...)
 	bool is_regular_file() const;
 };

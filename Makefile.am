@@ -9,6 +9,8 @@ eclean_kernel_SOURCES = \
 	src/ek2/file.h \
 	src/ek2/files.cxx \
 	src/ek2/files.h \
+	src/ek2/files/kernelfile.cxx \
+	src/ek2/files/kernelfile.h \
 	src/ek2/fileset.cxx \
 	src/ek2/fileset.h \
 	src/ek2/layout.cxx \
@@ -21,4 +23,6 @@ eclean_kernel_SOURCES = \
 	src/ek2/util/directorystream.h \
 	src/ek2/util/error.cxx \
 	src/ek2/util/error.h \
+	src/ek2/util/relativepath.cxx \
+	src/ek2/util/relativepath.h \
 	src/main.cxx
