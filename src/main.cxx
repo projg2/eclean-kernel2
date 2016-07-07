@@ -26,8 +26,8 @@ static void print_help(std::ostream& out, const char* argv0)
 {
 	out << "Usage: " << argv0 << " [options]\n"
 		"Options:\n"
-		"  --help                  print this help message\n"
-		"  --version               print program version\n";
+		"  -h, --help              print this help message\n"
+		"  -V, --version           print program version\n";
 }
 
 int main(int argc, char* argv[])
