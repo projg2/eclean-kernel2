@@ -109,5 +109,7 @@ int main(int argc, char* argv[])
 		return 1;
 	}
 
+	l->find_kernels();
+
 	return 0;
 }

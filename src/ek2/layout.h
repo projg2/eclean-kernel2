@@ -12,6 +12,11 @@
 // them
 class Layout
 {
+public:
+	// find kernels and store them internally
+	// may output to stderr
+	// returns true on success, false if fatal error occured
+	virtual bool find_kernels() = 0;
 };
 
 #endif /*EK2_LAYOUT_H*/

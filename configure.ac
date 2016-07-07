@@ -4,7 +4,11 @@ AC_CONFIG_AUX_DIR([build-aux])
 AC_CONFIG_MACRO_DIR([build-aux])
 AM_INIT_AUTOMAKE([1.6 foreign dist-bzip2 subdir-objects])
 
+AC_LANG([C++])
 AC_PROG_CXX
+
+AC_CHECK_FUNCS([fstatat lstat])
+AC_STRUCT_DIRENT_D_TYPE
 
 AC_CONFIG_HEADERS([config.h])
 AC_CONFIG_FILES([Makefile])
