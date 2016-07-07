@@ -7,7 +7,11 @@
 #	include "config.h"
 #endif
 
+#include "ek2/layout.h"
+#include "ek2/layouts.h"
+
 #include <iostream>
+#include <memory>
 #include <ostream>
 
 extern "C"
@@ -15,9 +19,11 @@ extern "C"
 #	include <getopt.h>
 };
 
-static const char* short_options = "lhV";
+static const char* short_options = "lo:hV";
 static const struct option long_options[] = {
 	{ "list-kernels", no_argument, nullptr, 'l' },
+
+	{ "layout", required_argument, nullptr, 'o' },
 
 	{ "help", no_argument, nullptr, 'h' },
 	{ "version", no_argument, nullptr, 'V' },
@@ -31,6 +37,8 @@ static void print_help(std::ostream& out, const char* argv0)
 		"Actions:\n"
 		"  -l, --list-kernels      list installed kernels\n"
 		"Options:\n"
+		"  -o, --layout <layout>   use specific layout (by name)\n"
+		"\n"
 		"  -h, --help              print this help message\n"
 		"  -V, --version           print program version\n";
 }
@@ -44,6 +52,7 @@ enum class Action
 int main(int argc, char* argv[])
 {
 	Action act = Action::none;
+	const char* layout = "std";
 
 	while (true)
 	{
@@ -61,6 +70,10 @@ int main(int argc, char* argv[])
 					return 1;
 				}
 				act = Action::list_kernels;
+				break;
+
+			case 'o':
+				layout = optarg;
 				break;
 
 			case 'h':
@@ -86,6 +99,13 @@ int main(int argc, char* argv[])
 		std::cerr << argv[0] << ": unexpected positional parameter: "
 			<< argv[optind] << "\n";
 		print_help(std::cerr, argv[0]);
+		return 1;
+	}
+
+	std::unique_ptr<Layout> l = get_layout(layout);
+	if (!l)
+	{
+		std::cerr << argv[0] << ": unknown layout " << layout << "\n";
 		return 1;
 	}
 
