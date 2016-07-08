@@ -9,6 +9,7 @@
 
 #include "ek2/layout.h"
 #include "ek2/layouts.h"
+#include "ek2/util/error.h"
 
 #include <iostream>
 #include <memory>
@@ -49,7 +50,7 @@ enum class Action
 	list_kernels,
 };
 
-int main(int argc, char* argv[])
+int sub_main(int argc, char* argv[])
 {
 	Action act = Action::none;
 	const char* layout = "std";
@@ -112,4 +113,18 @@ int main(int argc, char* argv[])
 	l->find_kernels();
 
 	return 0;
+}
+
+int main(int argc, char* argv[])
+{
+	try
+	{
+		return sub_main(argc, argv);
+	}
+	catch (const Error& e)
+	{
+		std::cerr << argv[0] << ": terminating due to an error:\n"
+			<< e.what() << std::endl;
+		return 1;
+	}
 }

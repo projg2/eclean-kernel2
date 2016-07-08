@@ -19,4 +19,6 @@ eclean_kernel_SOURCES = \
 	src/ek2/layouts.h \
 	src/ek2/util/directorystream.cxx \
 	src/ek2/util/directorystream.h \
+	src/ek2/util/error.cxx \
+	src/ek2/util/error.h \
 	src/main.cxx
