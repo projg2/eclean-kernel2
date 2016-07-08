@@ -9,8 +9,13 @@
 
 #include "ek2/files/kernelfile.h"
 
+#include "ek2/util/error.h"
+
+#include <cerrno>
+
 extern "C"
 {
+#	include <sys/types.h>
 #	include <fcntl.h>
 #	include <unistd.h>
 };
@@ -26,10 +31,18 @@ std::shared_ptr<File> KernelFile::construct(RelativePath& path)
 	int fd = path.file_fd(O_RDONLY);
 
 	// TODO: error reporting
-	if (lseek(fd, 0x202, SEEK_SET) != 0x202)
+	off_t pos = lseek(fd, 0x202, SEEK_SET);
+	if (pos == -1)
+		throw IOError("Seeking failed on " + path.filename(), errno);
+	else if (pos != 0x202) // short file
 		return nullptr;
-	if (read(fd, buf, sizeof(buf)) != sizeof(buf))
+
+	ssize_t rd = read(fd, buf, sizeof(buf));
+	if (rd == -1)
+		throw IOError("Reading failed on " + path.filename(), errno);
+	else if (rd != sizeof(buf))
 		return nullptr;
+
 	if (std::string(buf, sizeof(buf)) != "HdrS")
 		return nullptr;
 

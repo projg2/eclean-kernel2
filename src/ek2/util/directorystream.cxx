@@ -8,6 +8,7 @@
 #endif
 
 #include "ek2/util/directorystream.h"
+#include "ek2/util/error.h"
 
 #include <cassert>
 #include <cerrno>
@@ -26,84 +27,56 @@ DirectoryStream::DirectoryStream()
 {
 }
 
-DirectoryStream::DirectoryStream(const char* path)
-	: dir_(opendir(path)), err_(errno), path_(path)
+DirectoryStream::DirectoryStream(const std::string& path)
+	: dir_(opendir(path.c_str())), path_(path)
 {
+	if (!dir_)
+		throw IOError("Unable to open directory " + path, errno);
 }
 
 DirectoryStream::~DirectoryStream()
 {
-	if (is_open())
-		close();
+	if (dir_)
+		closedir(dir_);
 }
 
-bool DirectoryStream::open(const char* path)
+void DirectoryStream::open(const std::string& path)
 {
-	assert(!is_open());
+	assert(!dir_);
 	path_ = path;
-	dir_ = opendir(path);
+	dir_ = opendir(path.c_str());
 	if (!dir_)
-		err_ = errno;
-	return is_open();
+		throw IOError("Unable to open directory " + path, errno);
 }
 
-bool DirectoryStream::close()
+void DirectoryStream::close()
 {
 	DIR* dir = dir_;
-	assert(is_open());
+	assert(dir);
 	// always set to null, otherwise we'd be calling close() again
 	// in destructor if error occurred
 	dir_ = nullptr;
-	path_.clear();
 
 	if (closedir(dir) != 0)
-	{
-		err_ = errno;
-		return false;
-	}
-	else
-		return true;
+		throw IOError("Unable to close directory " + path_, errno);
+
+	path_.clear();
 }
 
 bool DirectoryStream::read()
 {
-	assert(is_open());
+	assert(dir_);
 	// needed to distinguish EOF & error
 	errno = 0;
 	ent_ = readdir(dir_);
-	err_ = errno;
-	return good();
-}
-
-bool DirectoryStream::is_open() const
-{
-	return dir_ != nullptr;
-}
-
-bool DirectoryStream::eof() const
-{
-	return !good() && err_ == 0;
-}
-
-bool DirectoryStream::bad() const
-{
-	return !good() && err_ != 0;
-}
-
-bool DirectoryStream::good() const
-{
-	assert(is_open());
+	if (!ent_ && errno != 0)
+		throw IOError("Reading directory " + path_ + "failed", errno);
 	return ent_ != nullptr;
-}
-
-int DirectoryStream::error() const
-{
-	return err_;
 }
 
 std::string DirectoryStream::filename() const
 {
-	assert(good());
+	assert(dir_ && ent_);
 	return ent_->d_name;
 }
 
@@ -123,7 +96,7 @@ RelativePath DirectoryStream::relative_path() const
 
 bool DirectoryStream::is_regular_file() const
 {
-	assert(good());
+	assert(dir_ && ent_);
 #if defined(HAVE_STRUCT_DIRENT_D_TYPE)
 	switch (ent_->d_type)
 	{
@@ -147,11 +120,7 @@ bool DirectoryStream::is_regular_file() const
 	ret = stat(path());
 #endif
 	if (ret != 0)
-	{
-		// TODO: better error handling
-		// (assume not a regular file -- rather a broken thingie)
-		return false;
-	}
+		throw IOError("Unable to stat file " + path(), errno);
 
 	return S_ISREG(st.st_mode);
 }

@@ -9,6 +9,9 @@
 
 #include "ek2/util/relativepath.h"
 
+#include "ek2/util/error.h"
+
+#include <cerrno>
 #include <stdexcept>
 
 extern "C"
@@ -28,17 +31,34 @@ RelativePath::RelativePath(int dir_fd, std::string&& filename)
 RelativePath::~RelativePath()
 {
 	if (file_fd_ != -1)
+	{
 		close(file_fd_);
+	}
+}
+
+const std::string& RelativePath::filename() const
+{
+	return filename_;
 }
 
 int RelativePath::file_fd(int flags)
 {
 	if (file_fd_ != -1 && flags != open_mode_)
-		throw std::runtime_error("Reopening not implemented yet");
+		throw Error("Reopening not implemented yet");
 
-	if (dir_fd_ == -1)
-		return ::open(filename_.c_str(), flags);
+	if (file_fd_ == -1)
+	{
+		if (dir_fd_ == -1)
+			file_fd_ = ::open(filename_.c_str(), flags);
 #if defined(HAVE_OPENAT)
-	return openat(dir_fd_, filename_.c_str(), flags);
+		file_fd_ = openat(dir_fd_, filename_.c_str(), flags);
 #endif
+
+		if (file_fd_ == -1)
+			throw IOError("Unable to open " + filename_, errno);
+
+		open_mode_ = flags;
+	}
+
+	return file_fd_;
 }

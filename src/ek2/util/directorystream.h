@@ -24,7 +24,6 @@ class DirectoryStream
 {
 	DIR* dir_;
 	const struct dirent* ent_;
-	int err_;
 	std::string path_;
 
 public:
@@ -32,7 +31,7 @@ public:
 	DirectoryStream();
 	// create a directory stream and call open()
 	// make sure to check is_open() to verify that the attempt succeeded
-	DirectoryStream(const char* path);
+	DirectoryStream(const std::string& path);
 	// destroy the directory stream
 	// closes if it necessary; however, prefer calling close() explicitly
 	// since this does not provide a way to check for errors
@@ -42,32 +41,15 @@ public:
 
 	// open a directory stream
 	// the stream must not be open yet
-	// returns true on success, false on error
-	bool open(const char* path);
+	// throws IOError on error
+	void open(const std::string& path);
 	// close the directory stream
-	// returns true on success, false on error
-	bool close();
+	// throws IOError on error
+	void close();
 	// read next file entry
-	// returns true if entry was read, false on eof or error
-	// (check eof() for EOF, bad() for error)
+	// returns true if entry was read, false on eof
+	// throws IOError on error
 	bool read();
-
-	// == stream state getters ==
-
-	// check if directory stream has been opened successfully
-	// (if false post open(), then an error occured)
-	bool is_open() const;
-	// check if last read() resulted in an EOF
-	bool eof() const;
-	// check if last read() resulted in an error
-	bool bad() const;
-	// check if last read() was good, i.e. no error and no EOF happened
-	bool good() const;
-	// return the stored errno of last stream I/O call
-	// if is_open() is false after open(), contains opendir() errno
-	// if bad() is true, contains readdir() errno
-	// if close() returned false, contains closedir() errno
-	int error() const;
 
 	// == current stream entry getters ==
 	// (valid only if !eof() and !bad())

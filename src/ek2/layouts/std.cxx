@@ -14,8 +14,6 @@
 #include <iostream>
 #include <memory>
 
-#include <cstring>
-
 std::unique_ptr<Layout> StdLayout::construct()
 {
 	return std::unique_ptr<Layout>{static_cast<Layout*>(new StdLayout())};
@@ -23,15 +21,9 @@ std::unique_ptr<Layout> StdLayout::construct()
 
 bool StdLayout::find_kernels()
 {
-	const char* boot_path = "/boot";
+	const std::string boot_path{"/boot"};
 
-	if (!dir_.open(boot_path))
-	{
-		std::cerr << "Unable to open " << boot_path << ": "
-			<< strerror(dir_.error()) << std::endl;
-		return false;
-	}
-
+	dir_.open(boot_path);
 	while (dir_.read())
 	{
 		// skip ., .. and all hidden files
@@ -46,16 +38,7 @@ bool StdLayout::find_kernels()
 		if (f)
 			std::cerr << dir_.path() << std::endl;
 	}
-
-	if (dir_.bad())
-	{
-		std::cerr << "readdir() failed on " << boot_path << ": "
-			<< strerror(dir_.error()) << std::endl;
-	}
-
-	if (!dir_.close())
-		std::cerr << "Warning: closedir() failed on " << boot_path << ": "
-			<< strerror(dir_.error()) << std::endl;
+	dir_.close();
 
 	return true;
 }

@@ -23,4 +23,14 @@ public:
 	const std::string& what() const;
 };
 
+class IOError : public Error
+{
+	int err_;
+
+public:
+	IOError(std::string&& msg, int errno_val);
+
+	int err() const;
+};
+
 #endif /*EK2_UTIL_ERROR_H*/
