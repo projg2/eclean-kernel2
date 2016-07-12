@@ -62,6 +62,8 @@ public:
 	RelativePath relative_path() const;
 	// check if the current file is a regular file (not a dir, symlink...)
 	bool is_regular_file() const;
+	// check if the current file is a regular dir (not a file, symlink...)
+	bool is_regular_directory() const;
 };
 
 #endif /*EK2_UTIL_DIRECTORY_H*/

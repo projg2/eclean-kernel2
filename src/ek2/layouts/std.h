@@ -20,8 +20,11 @@ class StdLayout : public Layout
 {
 	// keep /boot open for relative actions
 	DirectoryStream boot_dir_;
+	// /lib/modules
+	DirectoryStream modules_dir_;
 
 	std::unordered_map<std::string, FileSet> file_map_;
+	std::unordered_map<std::string, std::shared_ptr<File>> modules_map_;
 
 public:
 	// allocate and construct a new StdLayout

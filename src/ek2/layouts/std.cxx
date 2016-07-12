@@ -11,6 +11,7 @@
 
 #include "ek2/files/genericfile.h"
 #include "ek2/files/kernelfile.h"
+#include "ek2/files/modulesdir.h"
 
 #include <iostream>
 #include <memory>
@@ -57,6 +58,26 @@ static std::string find_version(const std::string& fn)
 bool StdLayout::find_kernels()
 {
 	const std::string boot_path{"/boot"};
+	const std::string modules_path{"/lib/modules"};
+
+	modules_dir_.open(modules_path);
+	while (modules_dir_.read())
+	{
+		// skip ., .. and all hidden files
+		if (modules_dir_.filename()[0] == '.')
+			continue;
+		// skip non-directories and symlinks
+		if (!modules_dir_.is_regular_directory())
+			continue;
+
+		RelativePath rpath{modules_dir_.relative_path()};
+		std::shared_ptr<File> f;
+		f = ModulesDir::try_construct(rpath);
+
+		if (f)
+			modules_map_[f->filename()] = f;
+	}
+	modules_dir_.close();
 
 	boot_dir_.open(boot_path);
 	while (boot_dir_.read())
@@ -99,6 +120,11 @@ bool StdLayout::find_kernels()
 		}
 	}
 	boot_dir_.close();
+
+	for (const std::pair<std::string, std::shared_ptr<File>>& kf : modules_map_)
+	{
+		std::cerr << "mod: " << kf.first << "\n";
+	}
 
 	for (const std::pair<std::string, FileSet>& kf : file_map_)
 	{

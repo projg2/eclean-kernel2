@@ -94,6 +94,7 @@ RelativePath DirectoryStream::relative_path() const
 #endif
 }
 
+// TODO: combine the two into something generic
 bool DirectoryStream::is_regular_file() const
 {
 	assert(dir_ && ent_);
@@ -123,4 +124,35 @@ bool DirectoryStream::is_regular_file() const
 		throw IOError("Unable to stat file " + path(), errno);
 
 	return S_ISREG(st.st_mode);
+}
+
+bool DirectoryStream::is_regular_directory() const
+{
+	assert(dir_ && ent_);
+#if defined(HAVE_STRUCT_DIRENT_D_TYPE)
+	switch (ent_->d_type)
+	{
+		case DT_DIR:
+			return true;
+		default:
+			return false;
+		case DT_UNKNOWN:
+			;
+	}
+#endif
+
+	struct stat st;
+	int ret;
+
+#if defined(HAVE_FSTATAT)
+	ret = fstatat(dirfd(dir_), ent_->d_name, &st, AT_SYMLINK_NOFOLLOW);
+#elif defined(HAVE_LSTAT)
+	ret = lstat(path(), &st);
+#else
+	ret = stat(path());
+#endif
+	if (ret != 0)
+		throw IOError("Unable to stat file " + path(), errno);
+
+	return S_ISDIR(st.st_mode);
 }

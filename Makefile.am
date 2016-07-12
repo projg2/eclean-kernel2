@@ -11,6 +11,8 @@ eclean_kernel_SOURCES = \
 	src/ek2/files/genericfile.h \
 	src/ek2/files/kernelfile.cxx \
 	src/ek2/files/kernelfile.h \
+	src/ek2/files/modulesdir.cxx \
+	src/ek2/files/modulesdir.h \
 	src/ek2/fileset.cxx \
 	src/ek2/fileset.h \
 	src/ek2/layout.cxx \
