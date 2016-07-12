@@ -17,6 +17,10 @@ class File
 
 protected:
 	File(RelativePath&& path);
+
+public:
+	// get the filename (from relative path)
+	std::string filename() const;
 };
 
 #endif /*EK2_FILE_H*/

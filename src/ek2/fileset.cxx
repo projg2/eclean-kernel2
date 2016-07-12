@@ -8,3 +8,13 @@
 #endif
 
 #include "ek2/fileset.h"
+
+FileSet::file_vector_type& FileSet::files()
+{
+	return files_;
+}
+
+const FileSet::file_vector_type& FileSet::files() const
+{
+	return files_;
+}

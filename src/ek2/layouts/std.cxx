@@ -88,9 +88,24 @@ bool StdLayout::find_kernels()
 		}
 
 		if (f)
-			std::cerr << dir_.path() << " = " << find_version(dir_.filename()) << std::endl;
+		{
+			// apparent version from the filename
+			std::string apparent_ver{find_version(dir_.filename())};
+
+			if (apparent_ver.empty())
+				continue; // TODO
+
+			file_map_[apparent_ver].files().push_back(std::move(f));
+		}
 	}
 	dir_.close();
+
+	for (const std::pair<std::string, FileSet>& kf : file_map_)
+	{
+		std::cerr << kf.first << ":\n";
+		for (const std::shared_ptr<File>& f : kf.second.files())
+			std::cerr << "- " << f->filename() << "\n";
+	}
 
 	return true;
 }

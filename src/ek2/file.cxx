@@ -15,3 +15,8 @@ File::File(RelativePath&& path)
 	: path_(std::move(path))
 {
 }
+
+std::string File::filename() const
+{
+	return path_.filename();
+}
