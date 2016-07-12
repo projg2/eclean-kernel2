@@ -112,11 +112,21 @@ bool StdLayout::find_kernels()
 		{
 			// apparent version from the filename
 			std::string apparent_ver{find_version(boot_dir_.filename())};
+			const std::string& internal_ver{f->version()};
 
 			if (apparent_ver.empty())
 				continue; // TODO
 
-			file_map_[apparent_ver].files().push_back(std::move(f));
+			FileSet& fset = file_map_[apparent_ver];
+			fset.files().push_back(std::move(f));
+
+			if (!internal_ver.empty())
+			{
+				modules_map_type::iterator mi
+					= modules_map_.find(internal_ver);
+				if (mi != modules_map_.end())
+					fset.files().push_back(mi->second);
+			}
 		}
 	}
 	boot_dir_.close();

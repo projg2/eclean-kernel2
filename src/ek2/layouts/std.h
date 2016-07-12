@@ -24,7 +24,9 @@ class StdLayout : public Layout
 	DirectoryStream modules_dir_;
 
 	std::unordered_map<std::string, FileSet> file_map_;
-	std::unordered_map<std::string, std::shared_ptr<File>> modules_map_;
+	typedef std::unordered_map<std::string, std::shared_ptr<File>>
+		modules_map_type;
+	modules_map_type modules_map_;
 
 public:
 	// allocate and construct a new StdLayout
