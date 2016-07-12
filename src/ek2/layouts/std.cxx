@@ -58,30 +58,30 @@ bool StdLayout::find_kernels()
 {
 	const std::string boot_path{"/boot"};
 
-	dir_.open(boot_path);
-	while (dir_.read())
+	boot_dir_.open(boot_path);
+	while (boot_dir_.read())
 	{
 		// skip ., .. and all hidden files
-		if (dir_.filename()[0] == '.')
+		if (boot_dir_.filename()[0] == '.')
 			continue;
 		// skip directories, symlinks etc.
-		if (!dir_.is_regular_file())
+		if (!boot_dir_.is_regular_file())
 			continue;
 
 		std::shared_ptr<File> f;
-		f = get_file_by_magic(dir_.relative_path());
+		f = get_file_by_magic(boot_dir_.relative_path());
 
 		// no good magic? try the filename
 		if (!f)
 		{
-			std::string fn{dir_.filename()};
+			std::string fn{boot_dir_.filename()};
 
 			for (const std::string& pfx : supported_prefixes)
 			{
 				if (has_prefix(fn, pfx))
 				{
 					f = std::shared_ptr<File>(static_cast<File*>(
-							new GenericFile(dir_.relative_path())));
+							new GenericFile(boot_dir_.relative_path())));
 					break;
 				}
 			}
@@ -90,7 +90,7 @@ bool StdLayout::find_kernels()
 		if (f)
 		{
 			// apparent version from the filename
-			std::string apparent_ver{find_version(dir_.filename())};
+			std::string apparent_ver{find_version(boot_dir_.filename())};
 
 			if (apparent_ver.empty())
 				continue; // TODO
@@ -98,7 +98,7 @@ bool StdLayout::find_kernels()
 			file_map_[apparent_ver].files().push_back(std::move(f));
 		}
 	}
-	dir_.close();
+	boot_dir_.close();
 
 	for (const std::pair<std::string, FileSet>& kf : file_map_)
 	{

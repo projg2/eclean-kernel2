@@ -19,7 +19,7 @@
 class StdLayout : public Layout
 {
 	// keep /boot open for relative actions
-	DirectoryStream dir_;
+	DirectoryStream boot_dir_;
 
 	std::unordered_map<std::string, FileSet> file_map_;
 
