@@ -22,7 +22,7 @@ public:
 	// allocate and construct a new instance if the file format
 	// is supported
 	// returns nullptr if it is not
-	static std::shared_ptr<File> construct(RelativePath& path);
+	static std::shared_ptr<File> try_construct(RelativePath& path);
 };
 
 #endif /*EK2_FILES_KERNELFILE_H*/

@@ -25,7 +25,7 @@ KernelFile::KernelFile(RelativePath&& path)
 {
 }
 
-std::shared_ptr<File> KernelFile::construct(RelativePath& path)
+std::shared_ptr<File> KernelFile::try_construct(RelativePath& path)
 {
 	char buf[4];
 	int fd = path.file_fd(O_RDONLY);

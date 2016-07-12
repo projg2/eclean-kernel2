@@ -9,8 +9,8 @@
 
 #include "ek2/layouts/std.h"
 
-#include "ek2/files.h"
 #include "ek2/files/genericfile.h"
+#include "ek2/files/kernelfile.h"
 
 #include <iostream>
 #include <memory>
@@ -68,8 +68,9 @@ bool StdLayout::find_kernels()
 		if (!boot_dir_.is_regular_file())
 			continue;
 
+		RelativePath rpath{boot_dir_.relative_path()};
 		std::shared_ptr<File> f;
-		f = get_file_by_magic(boot_dir_.relative_path());
+		f = KernelFile::try_construct(rpath);
 
 		// no good magic? try the filename
 		if (!f)
@@ -80,8 +81,7 @@ bool StdLayout::find_kernels()
 			{
 				if (has_prefix(fn, pfx))
 				{
-					f = std::shared_ptr<File>(static_cast<File*>(
-							new GenericFile(boot_dir_.relative_path())));
+					f = GenericFile::try_construct(rpath);
 					break;
 				}
 			}

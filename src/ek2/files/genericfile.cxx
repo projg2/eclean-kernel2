@@ -14,7 +14,7 @@ GenericFile::GenericFile(RelativePath&& path)
 {
 }
 
-std::shared_ptr<File> GenericFile::construct(RelativePath& path)
+std::shared_ptr<File> GenericFile::try_construct(RelativePath& path)
 {
 	return std::unique_ptr<File>{static_cast<File*>(
 			new GenericFile(std::move(path)))};

@@ -7,8 +7,6 @@ bin_PROGRAMS = eclean-kernel
 eclean_kernel_SOURCES = \
 	src/ek2/file.cxx \
 	src/ek2/file.h \
-	src/ek2/files.cxx \
-	src/ek2/files.h \
 	src/ek2/files/genericfile.cxx \
 	src/ek2/files/genericfile.h \
 	src/ek2/files/kernelfile.cxx \
