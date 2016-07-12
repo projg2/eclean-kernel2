@@ -36,8 +36,12 @@ RelativePath::~RelativePath()
 	}
 }
 
-const std::string& RelativePath::filename() const
+std::string RelativePath::filename() const
 {
+	std::string::size_type slash_pos = filename_.rfind('/');
+
+	if (slash_pos != filename_.npos)
+		return filename_.substr(slash_pos+1);
 	return filename_;
 }
 

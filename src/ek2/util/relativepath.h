@@ -33,8 +33,8 @@ public:
 	RelativePath& operator=(const RelativePath&) = delete;
 	RelativePath& operator=(RelativePath&&) = default;
 
-	// return either the filename or the full path
-	const std::string& filename() const;
+	// get the filename
+	std::string filename() const;
 
 	// return the shared fd for file open in given mode
 	// if the file is not open yet, it is opened
