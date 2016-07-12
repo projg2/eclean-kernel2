@@ -45,6 +45,15 @@ static std::array<std::string, 4> supported_prefixes{
 	"initrd-",
 };
 
+static std::string find_version(const std::string& fn)
+{
+	std::string::size_type sep_pos = fn.find('-');
+
+	if (sep_pos != fn.npos)
+		return fn.substr(sep_pos+1);
+	return {};
+}
+
 bool StdLayout::find_kernels()
 {
 	const std::string boot_path{"/boot"};
@@ -79,7 +88,7 @@ bool StdLayout::find_kernels()
 		}
 
 		if (f)
-			std::cerr << dir_.path() << std::endl;
+			std::cerr << dir_.path() << " = " << find_version(dir_.filename()) << std::endl;
 	}
 	dir_.close();
 

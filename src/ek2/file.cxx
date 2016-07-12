@@ -9,6 +9,8 @@
 
 #include "ek2/file.h"
 
+#include <cassert>
+
 File::File(RelativePath&& path)
 	: path_(std::move(path))
 {
