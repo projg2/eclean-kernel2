@@ -20,3 +20,9 @@ std::string File::filename() const
 {
 	return path_.filename();
 }
+
+const std::string& File::version() const
+{
+	static const std::string empty;
+	return empty;
+}

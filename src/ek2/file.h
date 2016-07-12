@@ -21,6 +21,10 @@ protected:
 public:
 	// get the filename (from relative path)
 	std::string filename() const;
+
+	// get the internal kernel version
+	// returns empty string if not available
+	virtual const std::string& version() const;
 };
 
 #endif /*EK2_FILE_H*/

@@ -12,12 +12,18 @@
 #include "ek2/util/relativepath.h"
 
 #include <memory>
+#include <string>
 
 // a kernel file
 class KernelFile : public File
 {
+	std::string version_;
+
 public:
-	KernelFile(RelativePath&& path);
+	KernelFile(RelativePath&& path, std::string&& version);
+
+	// get the internal kernel version
+	virtual const std::string& version() const;
 
 	// allocate and construct a new instance if the file format
 	// is supported
