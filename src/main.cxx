@@ -7,10 +7,12 @@
 #	include "config.h"
 #endif
 
+#include "ek2/actions.h"
 #include "ek2/layout.h"
 #include "ek2/layouts.h"
 #include "ek2/util/error.h"
 
+#include <cassert>
 #include <iostream>
 #include <memory>
 #include <ostream>
@@ -111,6 +113,16 @@ int sub_main(int argc, char* argv[])
 	}
 
 	l->find_kernels();
+
+	switch (act)
+	{
+		case Action::none:
+			assert(0 && "Action::none reached past first check");
+			break;
+		case Action::list_kernels:
+			list_kernels(*l);
+			break;
+	}
 
 	return 0;
 }

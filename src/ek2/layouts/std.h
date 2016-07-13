@@ -31,6 +31,9 @@ public:
 	static std::unique_ptr<Layout> construct();
 
 	virtual bool find_kernels();
+
+	virtual std::vector<FileSet>& kernels();
+	virtual const std::vector<FileSet>& kernels() const;
 };
 
 #endif /*EK2_LAYOUTS_STD_H*/

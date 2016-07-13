@@ -15,7 +15,6 @@
 #include "ek2/util/error.h"
 
 #include <cassert>
-#include <iostream>
 #include <memory>
 
 std::unique_ptr<Layout> StdLayout::construct()
@@ -191,16 +190,15 @@ bool StdLayout::find_kernels()
 		kernels_.push_back(std::move(module_set));
 	}
 
-	for (const FileSet& fs : kernels_)
-	{
-		if (!fs.apparent_version().empty())
-			std::cerr << fs.apparent_version() << ":\n";
-		else
-			std::cerr << "[" << fs.internal_version() << "]:\n";
-
-		for (const std::shared_ptr<File>& f : fs.files())
-			std::cerr << "- " << f->filename() << "\n";
-	}
-
 	return true;
+}
+
+std::vector<FileSet>& StdLayout::kernels()
+{
+	return kernels_;
+}
+
+const std::vector<FileSet>& StdLayout::kernels() const
+{
+	return kernels_;
 }

@@ -5,6 +5,8 @@ AM_CPPFLAGS = -I$(top_srcdir)/src
 bin_PROGRAMS = eclean-kernel
 
 eclean_kernel_SOURCES = \
+	src/ek2/actions.cxx \
+	src/ek2/actions.h \
 	src/ek2/file.cxx \
 	src/ek2/file.h \
 	src/ek2/files/genericfile.cxx \
