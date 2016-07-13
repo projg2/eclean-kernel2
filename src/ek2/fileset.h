@@ -14,6 +14,8 @@
 #include <string>
 #include <vector>
 
+#include <ctime>
+
 // A set of associated files, i.e. corresponding to the same kernel.
 class FileSet
 {
@@ -37,6 +39,9 @@ public:
 	// get or set the internal version
 	const std::string& internal_version() const;
 	void internal_version(const std::string& val);
+
+	// get mtime (for sorting)
+	time_t mtime() const;
 };
 
 #endif /*EK2_FILESET_H*/

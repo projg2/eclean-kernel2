@@ -84,7 +84,6 @@ bool StdLayout::find_kernels()
 		if (f)
 			module_map[f->filename()] = f;
 	}
-	modules_dir_.close();
 
 	// collect all kernel files from /boot
 	boot_dir_.open(boot_path);
@@ -162,7 +161,6 @@ bool StdLayout::find_kernels()
 			}
 		}
 	}
-	boot_dir_.close();
 
 	// post-process collected /boot FileSets and move them to the final list
 	kernels_.clear();

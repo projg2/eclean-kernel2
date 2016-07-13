@@ -10,6 +10,8 @@
 
 #include "ek2/util/relativepath.h"
 
+#include <ctime>
+
 // A generic interface used to refer to a file on disk.
 class File
 {
@@ -25,6 +27,9 @@ public:
 	// get the internal kernel version
 	// returns empty string if not available
 	virtual const std::string& version() const;
+
+	// get the file mtime
+	time_t mtime() const;
 };
 
 #endif /*EK2_FILE_H*/

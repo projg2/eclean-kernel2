@@ -10,8 +10,10 @@
 #include "ek2/actions.h"
 #include "ek2/layout.h"
 #include "ek2/layouts.h"
+#include "ek2/sorts.h"
 #include "ek2/util/error.h"
 
+#include <algorithm> // XXX TMP
 #include <cassert>
 #include <iostream>
 #include <memory>
@@ -22,11 +24,12 @@ extern "C"
 #	include <getopt.h>
 };
 
-static const char* short_options = "lo:hV";
+static const char* short_options = "lo:s:hV";
 static const struct option long_options[] = {
 	{ "list-kernels", no_argument, nullptr, 'l' },
 
 	{ "layout", required_argument, nullptr, 'o' },
+	{ "sort-order", required_argument, nullptr, 's' },
 
 	{ "help", no_argument, nullptr, 'h' },
 	{ "version", no_argument, nullptr, 'V' },
@@ -41,6 +44,7 @@ static void print_help(std::ostream& out, const char* argv0)
 		"  -l, --list-kernels      list installed kernels\n"
 		"Options:\n"
 		"  -o, --layout <layout>   use specific layout (by name)\n"
+		"  -s, --sort-order <ord>  use specific sort order (mtime)\n"
 		"\n"
 		"  -h, --help              print this help message\n"
 		"  -V, --version           print program version\n";
@@ -56,6 +60,7 @@ int sub_main(int argc, char* argv[])
 {
 	Action act = Action::none;
 	const char* layout = "std";
+	const char* sort_order = "mtime";
 
 	while (true)
 	{
@@ -77,6 +82,9 @@ int sub_main(int argc, char* argv[])
 
 			case 'o':
 				layout = optarg;
+				break;
+			case 's':
+				sort_order = optarg;
 				break;
 
 			case 'h':
@@ -112,7 +120,15 @@ int sub_main(int argc, char* argv[])
 		return 1;
 	}
 
+	fileset_sorting_function f = get_sorting_function(sort_order);
+	if (!f)
+	{
+		std::cerr << argv[0] << ": unknown sort order " << sort_order << "\n";
+		return 1;
+	}
+
 	l->find_kernels();
+	std::sort(l->kernels().begin(), l->kernels().end(), f);
 
 	switch (act)
 	{
