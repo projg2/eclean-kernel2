@@ -34,7 +34,5 @@ const std::string& File::version() const
 
 time_t File::mtime() const
 {
-	struct stat st{path_.stat()};
-
-	return st.st_mtime;
+	return path_.stat().st_mtime;
 }
