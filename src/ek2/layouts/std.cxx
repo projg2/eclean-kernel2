@@ -12,7 +12,9 @@
 #include "ek2/files/genericfile.h"
 #include "ek2/files/kernelfile.h"
 #include "ek2/files/modulesdir.h"
+#include "ek2/util/error.h"
 
+#include <cassert>
 #include <iostream>
 #include <memory>
 
@@ -60,6 +62,12 @@ bool StdLayout::find_kernels()
 	const std::string boot_path{"/boot"};
 	const std::string modules_path{"/lib/modules"};
 
+	std::unordered_map<std::string, FileSet> file_map;
+	typedef std::unordered_map<std::string, std::shared_ptr<File>>
+		module_map_type;
+	module_map_type module_map;
+
+	// collect all moduledirs first
 	modules_dir_.open(modules_path);
 	while (modules_dir_.read())
 	{
@@ -75,10 +83,11 @@ bool StdLayout::find_kernels()
 		f = ModulesDir::try_construct(rpath);
 
 		if (f)
-			modules_map_[f->filename()] = f;
+			module_map[f->filename()] = f;
 	}
 	modules_dir_.close();
 
+	// collect all kernel files from /boot
 	boot_dir_.open(boot_path);
 	while (boot_dir_.read())
 	{
@@ -117,29 +126,79 @@ bool StdLayout::find_kernels()
 			if (apparent_ver.empty())
 				continue; // TODO
 
-			FileSet& fset = file_map_[apparent_ver];
+			FileSet& fset = file_map[apparent_ver];
 			fset.files().push_back(std::move(f));
 
+			// if we're on a kernel, we should have internal version
 			if (!internal_ver.empty())
 			{
-				modules_map_type::iterator mi
-					= modules_map_.find(internal_ver);
-				if (mi != modules_map_.end())
-					fset.files().push_back(mi->second);
+				// if this is a first file with internal version...
+				if (fset.internal_version().empty())
+				{
+					// set the internal version on FileSet
+					fset.internal_version(internal_ver);
+
+					// associate the module dir
+					module_map_type::iterator mi
+						= module_map.find(internal_ver);
+					if (mi != module_map.end())
+						fset.files().push_back(mi->second);
+				}
+				// otherwise, check if it matches the previous one
+				else if (fset.internal_version() != internal_ver)
+				{
+					// no match? search for the previous source
+					// (for more informative output)
+					for (const std::shared_ptr<File>& f : fset.files())
+					{
+						if (!f->version().empty())
+							throw Error("Found two files with the same apparent version ("
+									+ apparent_ver + ") yet different internal version: "
+									+ f->filename() + " [" + fset.internal_version() + "] "
+									+ " and " + fset.files().back()->filename() + " ["
+									+ internal_ver + "]");
+					}
+					assert(0 && "Internal version in FileSet but no File has internal version");
+				}
 			}
 		}
 	}
 	boot_dir_.close();
 
-	for (const std::pair<std::string, std::shared_ptr<File>>& kf : modules_map_)
+	// post-process collected /boot FileSets and move them to the final list
+	kernels_.clear();
+	for (std::pair<const std::string, FileSet>& kf : file_map)
 	{
-		std::cerr << "mod: " << kf.first << "\n";
+		// set apparent version here, we do not need it earlier
+		// and it needs to be done only once
+		assert(!kf.first.empty());
+		kf.second.apparent_version(kf.first);
+
+		// leave only unused moduledirs in modules map
+		// others should have been copied into kernels already
+		module_map.erase(kf.second.internal_version());
+
+		// finally, move the FileSet to kernels
+		kernels_.push_back(std::move(kf.second));
 	}
 
-	for (const std::pair<std::string, FileSet>& kf : file_map_)
+	// add orphaned moduledirs to the final list
+	for (std::pair<const std::string, std::shared_ptr<File>>& km : module_map)
 	{
-		std::cerr << kf.first << ":\n";
-		for (const std::shared_ptr<File>& f : kf.second.files())
+		FileSet module_set;
+		module_set.internal_version(km.first);
+		module_set.files().push_back(std::move(km.second));
+		kernels_.push_back(std::move(module_set));
+	}
+
+	for (const FileSet& fs : kernels_)
+	{
+		if (!fs.apparent_version().empty())
+			std::cerr << fs.apparent_version() << ":\n";
+		else
+			std::cerr << "[" << fs.internal_version() << "]:\n";
+
+		for (const std::shared_ptr<File>& f : fs.files())
 			std::cerr << "- " << f->filename() << "\n";
 	}
 

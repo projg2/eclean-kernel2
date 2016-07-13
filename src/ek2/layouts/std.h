@@ -14,6 +14,7 @@
 
 #include <memory>
 #include <unordered_map>
+#include <vector>
 
 // Standard flat /boot used for a single system
 class StdLayout : public Layout
@@ -23,10 +24,7 @@ class StdLayout : public Layout
 	// /lib/modules
 	DirectoryStream modules_dir_;
 
-	std::unordered_map<std::string, FileSet> file_map_;
-	typedef std::unordered_map<std::string, std::shared_ptr<File>>
-		modules_map_type;
-	modules_map_type modules_map_;
+	std::vector<FileSet> kernels_;
 
 public:
 	// allocate and construct a new StdLayout
