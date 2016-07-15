@@ -44,7 +44,7 @@ static void print_help(std::ostream& out, const char* argv0)
 		"  -l, --list-kernels      list installed kernels\n"
 		"Options:\n"
 		"  -o, --layout <layout>   use specific layout (by name)\n"
-		"  -s, --sort-order <ord>  use specific sort order (mtime)\n"
+		"  -s, --sort-order <ord>  use specific sort order (mtime, version)\n"
 		"\n"
 		"  -h, --help              print this help message\n"
 		"  -V, --version           print program version\n";
@@ -60,7 +60,7 @@ int sub_main(int argc, char* argv[])
 {
 	Action act = Action::none;
 	const char* layout = "std";
-	const char* sort_order = "mtime";
+	const char* sort_order = "version";
 
 	while (true)
 	{
