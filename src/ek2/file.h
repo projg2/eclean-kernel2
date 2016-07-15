@@ -24,6 +24,10 @@ public:
 	// get the filename (from relative path)
 	std::string filename() const;
 
+	// get the textual name for the file type
+	// (useful for pretty output)
+	virtual const std::string& type() const = 0;
+
 	// get the internal kernel version
 	// returns empty string if not available
 	virtual const std::string& version() const;

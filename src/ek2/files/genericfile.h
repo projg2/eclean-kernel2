@@ -19,6 +19,8 @@ class GenericFile : public File
 public:
 	GenericFile(RelativePath&& path);
 
+	virtual const std::string& type() const;
+
 	// allocate and construct a new instance
 	// always succeeds
 	static std::shared_ptr<File> try_construct(RelativePath& path);

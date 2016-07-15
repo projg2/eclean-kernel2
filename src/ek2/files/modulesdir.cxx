@@ -14,6 +14,12 @@ ModulesDir::ModulesDir(RelativePath&& path)
 {
 }
 
+const std::string& ModulesDir::type() const
+{
+	static const std::string type_{"modules"};
+	return type_;
+}
+
 std::shared_ptr<File> ModulesDir::try_construct(RelativePath& path)
 {
 	return std::unique_ptr<File>{static_cast<File*>(

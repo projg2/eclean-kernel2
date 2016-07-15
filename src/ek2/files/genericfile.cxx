@@ -14,6 +14,12 @@ GenericFile::GenericFile(RelativePath&& path)
 {
 }
 
+const std::string& GenericFile::type() const
+{
+	static const std::string type_{"aux"};
+	return type_;
+}
+
 std::shared_ptr<File> GenericFile::try_construct(RelativePath& path)
 {
 	return std::unique_ptr<File>{static_cast<File*>(

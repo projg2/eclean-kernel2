@@ -22,6 +22,8 @@ class KernelFile : public File
 public:
 	KernelFile(RelativePath&& path, std::string&& version);
 
+	virtual const std::string& type() const;
+
 	// get the internal kernel version
 	virtual const std::string& version() const;
 

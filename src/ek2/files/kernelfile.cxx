@@ -28,6 +28,12 @@ KernelFile::KernelFile(RelativePath&& path, std::string&& version)
 {
 }
 
+const std::string& KernelFile::type() const
+{
+	static const std::string type_{"kernel"};
+	return type_;
+}
+
 const std::string& KernelFile::version() const
 {
 	return version_;
