@@ -10,15 +10,17 @@
 
 #include "ek2/util/relativepath.h"
 
+#include <memory>
+
 #include <ctime>
 
 // A generic interface used to refer to a file on disk.
 class File
 {
-	RelativePath path_;
-
 protected:
-	File(RelativePath&& path);
+	std::shared_ptr<RelativePath> path_;
+
+	File(std::shared_ptr<RelativePath> path);
 
 public:
 	// get the filename (from relative path)

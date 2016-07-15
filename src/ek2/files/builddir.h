@@ -5,25 +5,21 @@
 
 #pragma once
 
-#ifndef EK2_FILES_MODULESDIR_H
-#define EK2_FILES_MODULESDIR_H 1
+#ifndef EK2_FILES_BUILDDIR_H
+#define EK2_FILES_BUILDDIR_H 1
 
 #include "ek2/file.h"
 #include "ek2/util/relativepath.h"
 
 #include <memory>
 
-// a module directory for the kernel
-class ModulesDir : public File
+// a build directory for the kernel
+class BuildDir : public File
 {
 public:
-	ModulesDir(std::shared_ptr<RelativePath> path);
+	BuildDir(std::shared_ptr<RelativePath> path);
 
 	virtual const std::string& type() const;
-
-	// read path to build directory (if available)
-	// returns nullptr if no 'build' directory is found
-	std::shared_ptr<RelativePath> build_path();
 
 	// allocate and construct a new instance
 	// always succeeds
@@ -31,4 +27,4 @@ public:
 			std::shared_ptr<RelativePath> path);
 };
 
-#endif /*EK2_FILES_MODULESDIR_H*/
+#endif /*EK2_FILES_BUILDDIR_H*/

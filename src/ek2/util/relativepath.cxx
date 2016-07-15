@@ -12,6 +12,7 @@
 #include "ek2/util/error.h"
 
 #include <stdexcept>
+#include <vector>
 
 #include <cassert>
 #include <cerrno>
@@ -65,6 +66,8 @@ std::string RelativePath::filename() const
 
 std::string RelativePath::path() const
 {
+	if (!filename_.empty() && filename_[0] == '/')
+		return filename_;
 	return dir_->path_ + '/' + filename_;
 }
 
@@ -115,4 +118,41 @@ struct stat RelativePath::stat() const
 		throw IOError("Unable to stat " + path(), errno);
 
 	return buf;
+}
+
+std::string RelativePath::readlink() const
+{
+	std::vector<char> buf;
+
+	if (file_fd_ != -1)
+		throw Error("readlink() on open files not supported yet");
+
+	// start with expected length (+ 1 for length check)
+	buf.resize(stat().st_size + 1);
+
+	while (true)
+	{
+		ssize_t ret;
+#if defined(HAVE_READLINKAT)
+		ret = readlinkat(dirfd(dir_->dir_), filename_.c_str(),
+				buf.data(), buf.size());
+#else
+		ret = ::readlink(path().c_str(), buf.data(), buf.size());
+#endif
+
+		if (ret == -1)
+			throw IOError("Unable to readlink " + path(), errno);
+		// if we read up to buffer size, we don't know if there won't
+		// be more, so increase buffer size and try again
+		else if (ret == buf.size())
+			buf.resize(buf.size() + 0x100);
+		else
+		{
+			// truncate and return
+			buf.resize(ret);
+			break;
+		}
+	}
+
+	return {buf.begin(), buf.end()};
 }

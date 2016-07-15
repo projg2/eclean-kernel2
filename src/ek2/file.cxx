@@ -16,19 +16,19 @@ extern "C"
 #	include <sys/stat.h>
 };
 
-File::File(RelativePath&& path)
-	: path_(std::move(path))
+File::File(std::shared_ptr<RelativePath> path)
+	: path_(path)
 {
 }
 
 std::string File::filename() const
 {
-	return path_.filename();
+	return path_->filename();
 }
 
 std::string File::path() const
 {
-	return path_.path();
+	return path_->path();
 }
 
 const std::string& File::version() const
@@ -39,5 +39,5 @@ const std::string& File::version() const
 
 time_t File::mtime() const
 {
-	return path_.stat().st_mtime;
+	return path_->stat().st_mtime;
 }

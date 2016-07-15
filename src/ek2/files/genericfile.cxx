@@ -9,8 +9,8 @@
 
 #include "ek2/files/genericfile.h"
 
-GenericFile::GenericFile(RelativePath&& path)
-	: File(std::move(path))
+GenericFile::GenericFile(std::shared_ptr<RelativePath> path)
+	: File(path)
 {
 }
 
@@ -20,8 +20,9 @@ const std::string& GenericFile::type() const
 	return type_;
 }
 
-std::shared_ptr<File> GenericFile::try_construct(RelativePath& path)
+std::shared_ptr<File> GenericFile::try_construct(
+		std::shared_ptr<RelativePath> path)
 {
 	return std::unique_ptr<File>{static_cast<File*>(
-			new GenericFile(std::move(path)))};
+			new GenericFile(path))};
 }

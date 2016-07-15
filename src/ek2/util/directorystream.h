@@ -8,6 +8,7 @@
 #ifndef EK2_UTIL_DIRECTORY_H
 #define EK2_UTIL_DIRECTORY_H 1
 
+#include <memory>
 #include <string>
 
 extern "C"
@@ -16,6 +17,9 @@ extern "C"
 #	include <dirent.h>
 };
 
+// forward declaration
+class RelativePath;
+
 // A wrapper for open directory stream. Provides RAII- and OO-friendly
 // stream interface and a nice portability layer.
 class DirectoryStream
@@ -23,6 +27,7 @@ class DirectoryStream
 	DIR* dir_;
 	const struct dirent* ent_;
 	std::string path_;
+	std::shared_ptr<RelativePath> parent_directory_;
 
 	friend class RelativePath;
 
@@ -30,8 +35,10 @@ public:
 	// create a (closed) directory stream
 	DirectoryStream();
 	// create a directory stream and call open()
-	// make sure to check is_open() to verify that the attempt succeeded
 	DirectoryStream(const std::string& path);
+	// create a directory stream using relative path
+	// i.e. open a subdirectory
+	DirectoryStream(std::shared_ptr<RelativePath> rpath);
 	// destroy the directory stream
 	// closes if it necessary; however, prefer calling close() explicitly
 	// since this does not provide a way to check for errors

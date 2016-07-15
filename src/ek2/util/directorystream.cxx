@@ -8,7 +8,9 @@
 #endif
 
 #include "ek2/util/directorystream.h"
+
 #include "ek2/util/error.h"
+#include "ek2/util/relativepath.h"
 
 #include <cassert>
 #include <cerrno>
@@ -32,6 +34,14 @@ DirectoryStream::DirectoryStream(const std::string& path)
 {
 	if (!dir_)
 		throw IOError("Unable to open directory " + path, errno);
+}
+
+DirectoryStream::DirectoryStream(std::shared_ptr<RelativePath> rpath)
+	: dir_(fdopendir(rpath->file_fd(O_DIRECTORY))), path_(rpath->path()),
+		parent_directory_(rpath)
+{
+	if (!dir_)
+		throw IOError("Unable to fdopen directory " + path_, errno);
 }
 
 DirectoryStream::~DirectoryStream()

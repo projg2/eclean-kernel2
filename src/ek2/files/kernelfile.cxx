@@ -23,8 +23,8 @@ extern "C"
 #	include <unistd.h>
 };
 
-KernelFile::KernelFile(RelativePath&& path, std::string&& version)
-	: File(std::move(path)), version_(std::move(version))
+KernelFile::KernelFile(std::shared_ptr<RelativePath> path, std::string&& version)
+	: File(path), version_(std::move(version))
 {
 }
 
@@ -39,24 +39,25 @@ const std::string& KernelFile::version() const
 	return version_;
 }
 
-std::shared_ptr<File> KernelFile::try_construct(RelativePath& path)
+std::shared_ptr<File> KernelFile::try_construct(
+		std::shared_ptr<RelativePath> path)
 {
 	const std::string kernel_magic{"HdrS"};
 	std::string version;
 
 	std::array<char, 0x100> buf;
-	int fd = path.file_fd(O_RDONLY);
+	int fd = path->file_fd(O_RDONLY);
 
 	// TODO: error reporting
 	off_t pos = lseek(fd, 0x200, SEEK_SET);
 	if (pos == -1)
-		throw IOError("Seeking failed on " + path.filename(), errno);
+		throw IOError("Seeking failed on " + path->filename(), errno);
 	else if (pos != 0x200) // short file
 		return nullptr;
 
 	ssize_t rd = read(fd, buf.data(), 0x10);
 	if (rd == -1)
-		throw IOError("Reading failed on " + path.filename(), errno);
+		throw IOError("Reading failed on " + path->filename(), errno);
 	else if (rd != 0x10)
 		return nullptr;
 
@@ -69,7 +70,7 @@ std::shared_ptr<File> KernelFile::try_construct(RelativePath& path)
 		offset += 0x200;
 		pos = lseek(fd, offset, SEEK_SET);
 		if (pos == -1)
-			throw IOError("Seeking failed on " + path.filename(), errno);
+			throw IOError("Seeking failed on " + path->filename(), errno);
 		else if (pos != offset) // erraneous data?
 			return nullptr;
 
@@ -77,7 +78,7 @@ std::shared_ptr<File> KernelFile::try_construct(RelativePath& path)
 		{
 			rd = read(fd, buf.data(), buf.size());
 			if (rd == -1)
-				throw IOError("Reading failed on " + path.filename(), errno);
+				throw IOError("Reading failed on " + path->filename(), errno);
 			if (rd == 0)
 				return nullptr;
 
@@ -95,5 +96,5 @@ std::shared_ptr<File> KernelFile::try_construct(RelativePath& path)
 	}
 
 	return std::unique_ptr<File>{static_cast<File*>(
-			new KernelFile(std::move(path), std::move(version)))};
+			new KernelFile(path, std::move(version)))};
 }

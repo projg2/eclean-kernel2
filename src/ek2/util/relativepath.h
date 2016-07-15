@@ -67,6 +67,9 @@ public:
 	// if the file is open, fstat() is used
 	// if it is not, fstatat() is used instead
 	struct stat stat() const;
+
+	// read the symbolic link
+	std::string readlink() const;
 };
 
 #endif /*EK2_UTIL_RELATIVEPATH_H*/

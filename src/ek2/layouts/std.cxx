@@ -9,13 +9,16 @@
 
 #include "ek2/layouts/std.h"
 
+#include "ek2/files/builddir.h"
 #include "ek2/files/genericfile.h"
 #include "ek2/files/kernelfile.h"
 #include "ek2/files/modulesdir.h"
 #include "ek2/util/error.h"
 
+#include <algorithm>
 #include <cassert>
 #include <memory>
+#include <vector>
 
 std::unique_ptr<Layout> StdLayout::construct()
 {
@@ -62,7 +65,8 @@ bool StdLayout::find_kernels()
 	const std::string modules_path{"/lib/modules"};
 
 	std::unordered_map<std::string, FileSet> file_map;
-	typedef std::unordered_map<std::string, std::shared_ptr<File>>
+	typedef std::unordered_map<std::string,
+			std::vector<std::shared_ptr<File>>>
 		module_map_type;
 	module_map_type module_map;
 
@@ -77,12 +81,17 @@ bool StdLayout::find_kernels()
 		if (!modules_dir_->is_regular_directory())
 			continue;
 
-		RelativePath rpath{modules_dir_, modules_dir_->filename()};
-		std::shared_ptr<File> f;
-		f = ModulesDir::try_construct(rpath);
+		std::shared_ptr<RelativePath> rpath{
+			new RelativePath(modules_dir_, modules_dir_->filename())};
+		std::shared_ptr<ModulesDir> f{
+			new ModulesDir(rpath)};
 
-		if (f)
-			module_map[f->filename()] = f;
+		module_map[f->filename()] = {f};
+
+		std::shared_ptr<RelativePath> build_path{f->build_path()};
+		if (build_path)
+			module_map[f->filename()].push_back(
+					BuildDir::try_construct(build_path));
 	}
 
 	// collect all kernel files from /boot
@@ -96,7 +105,8 @@ bool StdLayout::find_kernels()
 		if (!boot_dir_->is_regular_file())
 			continue;
 
-		RelativePath rpath{boot_dir_, boot_dir_->filename()};
+		std::shared_ptr<RelativePath> rpath{
+			new RelativePath(boot_dir_, boot_dir_->filename())};
 		std::shared_ptr<File> f;
 		f = KernelFile::try_construct(rpath);
 
@@ -140,7 +150,10 @@ bool StdLayout::find_kernels()
 					module_map_type::iterator mi
 						= module_map.find(internal_ver);
 					if (mi != module_map.end())
-						fset.files().push_back(mi->second);
+					{
+						std::move(mi->second.begin(), mi->second.end(),
+								std::back_inserter(fset.files()));
+					}
 				}
 				// otherwise, check if it matches the previous one
 				else if (fset.internal_version() != internal_ver)
@@ -180,11 +193,12 @@ bool StdLayout::find_kernels()
 	}
 
 	// add orphaned moduledirs to the final list
-	for (std::pair<const std::string, std::shared_ptr<File>>& km : module_map)
+	for (std::pair<const std::string, std::vector<std::shared_ptr<File>>>& km : module_map)
 	{
 		FileSet module_set;
 		module_set.internal_version(km.first);
-		module_set.files().push_back(std::move(km.second));
+		std::move(km.second.begin(), km.second.end(),
+				std::back_inserter(module_set.files()));
 		kernels_.push_back(std::move(module_set));
 	}
 

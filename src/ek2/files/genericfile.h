@@ -17,13 +17,14 @@
 class GenericFile : public File
 {
 public:
-	GenericFile(RelativePath&& path);
+	GenericFile(std::shared_ptr<RelativePath> path);
 
 	virtual const std::string& type() const;
 
 	// allocate and construct a new instance
 	// always succeeds
-	static std::shared_ptr<File> try_construct(RelativePath& path);
+	static std::shared_ptr<File> try_construct(
+			std::shared_ptr<RelativePath> path);
 };
 
 #endif /*EK2_FILES_GENERICFILE_H*/
