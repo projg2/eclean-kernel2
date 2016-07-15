@@ -26,6 +26,11 @@ std::string File::filename() const
 	return path_.filename();
 }
 
+std::string File::path() const
+{
+	return path_.path();
+}
+
 const std::string& File::version() const
 {
 	static const std::string empty;

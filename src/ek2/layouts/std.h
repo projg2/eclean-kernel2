@@ -20,9 +20,9 @@
 class StdLayout : public Layout
 {
 	// keep /boot open for relative actions
-	DirectoryStream boot_dir_;
+	std::shared_ptr<DirectoryStream> boot_dir_;
 	// /lib/modules
-	DirectoryStream modules_dir_;
+	std::shared_ptr<DirectoryStream> modules_dir_;
 
 	std::vector<FileSet> kernels_;
 

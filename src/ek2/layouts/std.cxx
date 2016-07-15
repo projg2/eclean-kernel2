@@ -67,17 +67,17 @@ bool StdLayout::find_kernels()
 	module_map_type module_map;
 
 	// collect all moduledirs first
-	modules_dir_.open(modules_path);
-	while (modules_dir_.read())
+	modules_dir_.reset(new DirectoryStream(modules_path));
+	while (modules_dir_->read())
 	{
 		// skip ., .. and all hidden files
-		if (modules_dir_.filename()[0] == '.')
+		if (modules_dir_->filename()[0] == '.')
 			continue;
 		// skip non-directories and symlinks
-		if (!modules_dir_.is_regular_directory())
+		if (!modules_dir_->is_regular_directory())
 			continue;
 
-		RelativePath rpath{modules_dir_.relative_path()};
+		RelativePath rpath{modules_dir_, modules_dir_->filename()};
 		std::shared_ptr<File> f;
 		f = ModulesDir::try_construct(rpath);
 
@@ -86,24 +86,24 @@ bool StdLayout::find_kernels()
 	}
 
 	// collect all kernel files from /boot
-	boot_dir_.open(boot_path);
-	while (boot_dir_.read())
+	boot_dir_.reset(new DirectoryStream(boot_path));
+	while (boot_dir_->read())
 	{
 		// skip ., .. and all hidden files
-		if (boot_dir_.filename()[0] == '.')
+		if (boot_dir_->filename()[0] == '.')
 			continue;
 		// skip directories, symlinks etc.
-		if (!boot_dir_.is_regular_file())
+		if (!boot_dir_->is_regular_file())
 			continue;
 
-		RelativePath rpath{boot_dir_.relative_path()};
+		RelativePath rpath{boot_dir_, boot_dir_->filename()};
 		std::shared_ptr<File> f;
 		f = KernelFile::try_construct(rpath);
 
 		// no good magic? try the filename
 		if (!f)
 		{
-			std::string fn{boot_dir_.filename()};
+			std::string fn{boot_dir_->filename()};
 
 			for (const std::string& pfx : supported_prefixes)
 			{
@@ -118,7 +118,7 @@ bool StdLayout::find_kernels()
 		if (f)
 		{
 			// apparent version from the filename
-			std::string apparent_ver{find_version(boot_dir_.filename())};
+			std::string apparent_ver{find_version(boot_dir_->filename())};
 			const std::string& internal_ver{f->version()};
 
 			if (apparent_ver.empty())

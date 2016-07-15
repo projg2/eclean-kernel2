@@ -8,8 +8,6 @@
 #ifndef EK2_UTIL_DIRECTORY_H
 #define EK2_UTIL_DIRECTORY_H 1
 
-#include "ek2/util/relativepath.h"
-
 #include <string>
 
 extern "C"
@@ -25,6 +23,8 @@ class DirectoryStream
 	DIR* dir_;
 	const struct dirent* ent_;
 	std::string path_;
+
+	friend class RelativePath;
 
 public:
 	// create a (closed) directory stream
@@ -58,8 +58,6 @@ public:
 	std::string filename() const;
 	// absolute path to the current file
 	std::string path() const;
-	// RelativePath referencing the current file on top of open directory
-	RelativePath relative_path() const;
 	// check if the current file is a regular file (not a dir, symlink...)
 	bool is_regular_file() const;
 	// check if the current file is a regular dir (not a file, symlink...)

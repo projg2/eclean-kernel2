@@ -11,8 +11,10 @@
 
 #include "ek2/util/error.h"
 
-#include <cerrno>
 #include <stdexcept>
+
+#include <cassert>
+#include <cerrno>
 
 extern "C"
 {
@@ -49,21 +51,21 @@ OpenFD::operator int() const
 	return fd_;
 }
 
-RelativePath::RelativePath(int dir_fd, std::string&& filename)
-	: dir_fd_(dir_fd), filename_(filename), file_fd_(-1)
+RelativePath::RelativePath(std::shared_ptr<DirectoryStream> dir,
+			std::string&& filename)
+	: dir_(dir), filename_(filename), file_fd_(-1)
 {
-#if !defined(HAVE_OPENAT)
-	assert(dir_fd_ == -1);
-#endif
+	assert(!dir_->path_.empty());
 }
 
 std::string RelativePath::filename() const
 {
-	std::string::size_type slash_pos = filename_.rfind('/');
-
-	if (slash_pos != filename_.npos)
-		return filename_.substr(slash_pos+1);
 	return filename_;
+}
+
+std::string RelativePath::path() const
+{
+	return dir_->path_ + '/' + filename_;
 }
 
 int RelativePath::file_fd(int flags)
@@ -73,19 +75,15 @@ int RelativePath::file_fd(int flags)
 
 	if (file_fd_ == -1)
 	{
-		if (dir_fd_ == -1)
-			file_fd_ = ::open(filename_.c_str(), flags);
-		else
-		{
 #if defined(HAVE_OPENAT)
-			file_fd_ = openat(dir_fd_, filename_.c_str(), flags);
+		assert(dir_->dir_);
+		file_fd_ = openat(dirfd(dir_->dir_), filename_.c_str(), flags);
 #else
-			assert(0 && "dir_fd_ != -1 but no openat()");
+		file_fd_ = ::open(path().c_str(), flags);
 #endif
-		}
 
 		if (file_fd_ == -1)
-			throw IOError("Unable to open " + filename_, errno);
+			throw IOError("Unable to open " + path(), errno);
 
 		open_mode_ = flags;
 	}
@@ -102,27 +100,19 @@ struct stat RelativePath::stat() const
 		ret = fstat(file_fd_, &buf);
 	else
 	{
-		if (dir_fd_ == -1)
-		{
-#if defined(HAVE_LSTAT)
-			ret = lstat(filename_.c_str(), &buf);
-#else
-			ret = ::stat(filename_.c_str(), &buf);
-#endif
-		}
-		else
-		{
 #if defined(HAVE_FSTATAT)
-			ret = fstatat(dir_fd_, filename_.c_str(), &buf,
-					AT_SYMLINK_NOFOLLOW);
+		assert(dir_->dir_);
+		ret = fstatat(dirfd(dir_->dir_), filename_.c_str(), &buf,
+				AT_SYMLINK_NOFOLLOW);
+#elif defined(HAVE_LSTAT)
+		ret = lstat(path().c_str(), &buf);
 #else
-			assert(0 && "dir_fd_ != -1 but no fstatat()");
+		ret = ::stat(path().c_str(), &buf);
 #endif
-		}
 	}
 
 	if (ret == -1)
-		throw IOError("Unable to stat " + filename_, errno);
+		throw IOError("Unable to stat " + path(), errno);
 
 	return buf;
 }

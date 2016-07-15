@@ -8,6 +8,9 @@
 #ifndef EK2_UTIL_RELATIVEPATH_H
 #define EK2_UTIL_RELATIVEPATH_H 1
 
+#include "ek2/util/directorystream.h"
+
+#include <memory>
 #include <string>
 
 extern "C"
@@ -37,7 +40,7 @@ public:
 // (on systems not supporting *at() functions, absolute path is used)
 class RelativePath
 {
-	int dir_fd_;
+	std::shared_ptr<DirectoryStream> dir_;
 	std::string filename_;
 
 	OpenFD file_fd_;
@@ -45,12 +48,15 @@ class RelativePath
 
 public:
 	// create a new relative path
-	// fd specifies parent directory, filename the filename
-	// if *at() is not available, fd == -1, filename is full path
-	RelativePath(int dir_fd, std::string&& filename);
+	// the path will be relative to the associated DirectoryStream
+	// and reference the file named by filename
+	RelativePath(std::shared_ptr<DirectoryStream> dir,
+			std::string&& filename);
 
 	// get the filename
 	std::string filename() const;
+	// get the full path
+	std::string path() const;
 
 	// return the shared fd for file open in given mode
 	// if the file is not open yet, it is opened

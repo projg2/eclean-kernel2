@@ -23,6 +23,8 @@ protected:
 public:
 	// get the filename (from relative path)
 	std::string filename() const;
+	// get the full path (also from relative path)
+	std::string path() const;
 
 	// get the textual name for the file type
 	// (useful for pretty output)

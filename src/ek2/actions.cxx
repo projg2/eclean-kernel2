@@ -21,6 +21,6 @@ void list_kernels(const Layout& l)
 			std::cerr << "[" << fs.internal_version() << "]:\n";
 
 		for (const std::shared_ptr<File>& f : fs.files())
-			std::cerr << "- " << f->type() << ": " << f->filename() << "\n";
+			std::cerr << "- " << f->type() << ": " << f->path() << "\n";
 	}
 }
