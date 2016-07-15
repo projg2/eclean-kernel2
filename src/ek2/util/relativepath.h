@@ -40,7 +40,7 @@ class RelativePath
 	int dir_fd_;
 	std::string filename_;
 
-	int file_fd_;
+	OpenFD file_fd_;
 	int open_mode_;
 
 public:
