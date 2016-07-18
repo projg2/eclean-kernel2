@@ -37,6 +37,11 @@ const std::string& File::version() const
 	return empty;
 }
 
+FileID File::id() const
+{
+	return path_->id();
+}
+
 time_t File::mtime() const
 {
 	return path_->stat().st_mtime;

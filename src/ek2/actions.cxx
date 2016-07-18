@@ -9,6 +9,8 @@
 
 #include "ek2/actions.h"
 
+#include "ek2/util/error.h"
+
 #include <iostream>
 #include <string>
 #include <unordered_map>
@@ -44,7 +46,7 @@ void keep_newest(Layout& l, int keep_num, bool pretend)
 			std::cerr << "Removing...\n";
 
 		// map of files mapped to 'old' kernels that use them
-		typedef std::unordered_map<std::string, std::vector<std::string>>
+		typedef std::unordered_map<FileID, std::vector<std::string>>
 			file_use_map_type;
 		file_use_map_type file_use_map;
 
@@ -56,7 +58,18 @@ void keep_newest(Layout& l, int keep_num, bool pretend)
 			std::string v{pretty_version(*it)};
 			// store list of files to keep w/ reasons
 			for (const std::shared_ptr<File>& f : it->files())
-				file_use_map[f->path()].push_back(v);
+			{
+				try
+				{
+					file_use_map[f->id()].push_back(v);
+				}
+				catch (const IOError& e)
+				{
+					// skip missing files
+					if (e.err() != ENOENT)
+						throw;
+				}
+			}
 		}
 
 		// remove files that we're not keeping
@@ -66,14 +79,27 @@ void keep_newest(Layout& l, int keep_num, bool pretend)
 			std::cerr << pretty_version(*it) << ':' << std::endl;
 			for (std::shared_ptr<File>& f : it->files())
 			{
-				std::string path{f->path()};
+				file_use_map_type::iterator file_used;
+				try
+				{
+					file_used = file_use_map.find(f->id());
+				}
+				catch (const IOError& e)
+				{
+					if (e.err() == ENOENT)
+					{
+						std::cerr << "! " << f->path()
+							<< " (does not exist)" << std::endl;
+						continue;
+					}
+					else
+						throw;
+				}
 
-				file_use_map_type::iterator
-					file_used = file_use_map.find(path);
-				// file used by keptkernels
+				// file used by kept kernels
 				if (file_used != file_use_map.end())
 				{
-					std::cerr << "+ " << path << " (keeping, used also by: "
+					std::cerr << "+ " << f->path() << " (keeping, used also by: "
 						<< file_used->second.back();
 					if (file_used->second.size() > 1)
 						std::cerr << " and " << file_used->second.size() - 1
@@ -82,7 +108,7 @@ void keep_newest(Layout& l, int keep_num, bool pretend)
 				}
 				else
 				{
-					std::cerr << "- " << path << std::endl;
+					std::cerr << "- " << f->path() << std::endl;
 				}
 			}
 		}

@@ -36,6 +36,33 @@ public:
 	operator int() const;
 };
 
+// Struct useful for identifying the file on disk
+// (e.g. comparing for the same file)
+class FileID
+{
+	dev_t dev_;
+	ino_t ino_;
+
+public:
+	FileID(const struct stat& st);
+
+	bool operator==(FileID other) const;
+
+	friend class std::hash<FileID>;
+};
+
+namespace std
+{
+	template <>
+	struct hash<FileID>
+	{
+		typedef FileID argument_type;
+		typedef size_t result_type;
+
+		result_type operator()(argument_type id) const;
+	};
+};
+
 // Path relative to an open directory
 // (on systems not supporting *at() functions, absolute path is used)
 class RelativePath
@@ -67,6 +94,9 @@ public:
 	// if the file is open, fstat() is used
 	// if it is not, fstatat() is used instead
 	struct stat stat() const;
+
+	// get the identifying info for the file
+	FileID id() const;
 
 	// read the symbolic link
 	std::string readlink() const;

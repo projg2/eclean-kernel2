@@ -52,6 +52,22 @@ OpenFD::operator int() const
 	return fd_;
 }
 
+FileID::FileID(const struct stat& st)
+	: dev_(st.st_dev), ino_(st.st_ino)
+{
+}
+
+bool FileID::operator==(FileID other) const
+{
+	return dev_ == other.dev_ && ino_ == other.ino_;
+}
+
+std::hash<FileID>::result_type
+std::hash<FileID>::operator()(argument_type id) const
+{
+	return std::hash<dev_t>()(id.dev_) ^ (std::hash<ino_t>()(id.ino_) << 8);
+}
+
 RelativePath::RelativePath(std::shared_ptr<DirectoryStream> dir,
 			std::string&& filename)
 	: dir_(dir), filename_(filename), file_fd_(-1)
@@ -118,6 +134,11 @@ struct stat RelativePath::stat() const
 		throw IOError("Unable to stat " + path(), errno);
 
 	return buf;
+}
+
+FileID RelativePath::id() const
+{
+	return FileID(stat());
 }
 
 std::string RelativePath::readlink() const

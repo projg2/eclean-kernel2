@@ -36,6 +36,8 @@ public:
 	// returns empty string if not available
 	virtual const std::string& version() const;
 
+	// get the file identifying data
+	FileID id() const;
 	// get the file mtime
 	time_t mtime() const;
 };
