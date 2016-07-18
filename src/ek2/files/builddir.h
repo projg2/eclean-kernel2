@@ -14,7 +14,7 @@
 #include <memory>
 
 // a build directory for the kernel
-class BuildDir : public File
+class BuildDir : public Directory
 {
 public:
 	BuildDir(std::shared_ptr<RelativePath> path);

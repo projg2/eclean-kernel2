@@ -15,7 +15,7 @@
 #include <memory>
 
 ModulesDir::ModulesDir(std::shared_ptr<RelativePath> path)
-	: File(path)
+	: Directory(path)
 {
 }
 

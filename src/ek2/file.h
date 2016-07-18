@@ -40,6 +40,19 @@ public:
 	FileID id() const;
 	// get the file mtime
 	time_t mtime() const;
+
+	// remove the file
+	virtual void remove() const;
+};
+
+// File subclass suitable for directories
+class Directory : public File
+{
+public:
+	Directory(std::shared_ptr<RelativePath> path);
+
+	// remove the directory recursively
+	virtual void remove() const;
 };
 
 #endif /*EK2_FILE_H*/

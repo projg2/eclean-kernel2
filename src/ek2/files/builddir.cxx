@@ -10,7 +10,7 @@
 #include "ek2/files/builddir.h"
 
 BuildDir::BuildDir(std::shared_ptr<RelativePath> path)
-	: File(path)
+	: Directory(path)
 {
 }
 

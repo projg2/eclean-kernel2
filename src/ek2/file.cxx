@@ -46,3 +46,18 @@ time_t File::mtime() const
 {
 	return path_->stat().st_mtime;
 }
+
+void File::remove() const
+{
+	path_->unlink();
+}
+
+Directory::Directory(std::shared_ptr<RelativePath> path)
+	: File(path)
+{
+}
+
+void Directory::remove() const
+{
+	path_->rmdir_recursive();
+}

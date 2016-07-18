@@ -9,8 +9,10 @@
 
 #include "ek2/util/relativepath.h"
 
+#include "ek2/util/directorystream.h"
 #include "ek2/util/error.h"
 
+#include <forward_list>
 #include <stdexcept>
 #include <vector>
 
@@ -75,9 +77,15 @@ std::hash<FileID>::operator()(argument_type id) const
 
 RelativePath::RelativePath(std::shared_ptr<DirectoryStream> dir,
 			std::string&& filename)
+	: dir_own_(dir), dir_(*dir), filename_(filename), file_fd_(-1)
+{
+	assert(!dir_.path_.empty());
+}
+
+RelativePath::RelativePath(const DirectoryStream& dir, std::string&& filename)
 	: dir_(dir), filename_(filename), file_fd_(-1)
 {
-	assert(!dir_->path_.empty());
+	assert(!dir_.path_.empty());
 }
 
 std::string RelativePath::filename() const
@@ -89,7 +97,7 @@ std::string RelativePath::path() const
 {
 	if (!filename_.empty() && filename_[0] == '/')
 		return filename_;
-	return dir_->path_ + '/' + filename_;
+	return dir_.path_ + '/' + filename_;
 }
 
 OpenFD RelativePath::open(int flags) const
@@ -97,8 +105,8 @@ OpenFD RelativePath::open(int flags) const
 	int ret;
 
 #if defined(HAVE_OPENAT)
-	assert(dir_->dir_);
-	ret = openat(dirfd(dir_->dir_), filename_.c_str(), flags);
+	assert(dir_.dir_);
+	ret = openat(dirfd(dir_.dir_), filename_.c_str(), flags);
 #else
 	ret = ::open(path().c_str(), flags);
 #endif
@@ -132,8 +140,8 @@ struct stat RelativePath::stat() const
 	else
 	{
 #if defined(HAVE_FSTATAT)
-		assert(dir_->dir_);
-		ret = fstatat(dirfd(dir_->dir_), filename_.c_str(), &buf,
+		assert(dir_.dir_);
+		ret = fstatat(dirfd(dir_.dir_), filename_.c_str(), &buf,
 				AT_SYMLINK_NOFOLLOW);
 #elif defined(HAVE_LSTAT)
 		ret = lstat(path().c_str(), &buf);
@@ -167,7 +175,7 @@ std::string RelativePath::readlink() const
 	{
 		ssize_t ret;
 #if defined(HAVE_READLINKAT)
-		ret = readlinkat(dirfd(dir_->dir_), filename_.c_str(),
+		ret = readlinkat(dirfd(dir_.dir_), filename_.c_str(),
 				buf.data(), buf.size());
 #else
 		ret = ::readlink(path().c_str(), buf.data(), buf.size());
@@ -188,4 +196,106 @@ std::string RelativePath::readlink() const
 	}
 
 	return {buf.begin(), buf.end()};
+}
+
+void RelativePath::unlink() const
+{
+	int ret;
+
+#if defined(HAVE_UNLINKAT)
+	assert(dir_.dir_);
+	ret = unlinkat(dirfd(dir_.dir_), filename_.c_str(), 0);
+#else
+	ret = ::unlink(path().c_str());
+#endif
+
+	if (ret == -1)
+		throw IOError("Unable to unlink " + path(), errno);
+}
+
+void RelativePath::rmdir() const
+{
+	int ret;
+
+#if defined(HAVE_UNLINKAT)
+	assert(dir_.dir_);
+	ret = unlinkat(dirfd(dir_.dir_), filename_.c_str(),
+			AT_REMOVEDIR);
+#else
+	ret = ::rmdir(path().c_str());
+#endif
+
+	if (ret == -1)
+		throw IOError("Unable to remove directory " + path(), errno);
+}
+
+void RelativePath::rmdir_recursive() const
+{
+	// (reversed stack)
+	std::forward_list<DirectoryStream> stack;
+	stack.emplace_front(*this);
+
+	while (!stack.empty())
+	{
+		DirectoryStream& ds = stack.front();
+
+		if (!stack.front().read())
+		{
+			stack.pop_front();
+
+			// remove the now-empty directory
+			if (!stack.empty())
+			{
+				DirectoryStream& dir = stack.front();
+				RelativePath rp{dir, dir.filename()};
+				try
+				{
+					rp.rmdir();
+				}
+				catch (const IOError& e)
+				{
+					if (e.err() != ENOENT)
+						throw;
+				}
+			}
+			continue;
+		}
+
+		// skip special entries
+		if (ds.filename() == "." || ds.filename() == "..")
+			continue;
+
+		RelativePath rp{ds, ds.filename()};
+		bool isdir = false;
+		// is it a regular file, a symlink or anything unlinkable?
+		try
+		{
+			rp.unlink();
+		}
+		catch (const IOError& e)
+		{
+			switch (e.err())
+			{
+				case ENOENT:
+					// someone removed it for us? good enough
+					break;
+#ifdef EISDIR
+				case EISDIR:
+#endif
+				case EPERM:
+					// we can't unlink directories!
+					isdir = true;
+					break;
+				default:
+					throw;
+			}
+		}
+
+		// a directory after all? recur!
+		if (isdir)
+			stack.emplace_front(rp);
+	}
+
+	// remove the top directory
+	rmdir();
 }

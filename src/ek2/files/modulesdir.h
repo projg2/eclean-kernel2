@@ -14,7 +14,7 @@
 #include <memory>
 
 // a module directory for the kernel
-class ModulesDir : public File
+class ModulesDir : public Directory
 {
 public:
 	ModulesDir(std::shared_ptr<RelativePath> path);

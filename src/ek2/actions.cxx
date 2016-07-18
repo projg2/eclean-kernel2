@@ -109,6 +109,8 @@ void keep_newest(Layout& l, int keep_num, bool pretend)
 				else
 				{
 					std::cerr << "- " << f->path() << std::endl;
+					if (!pretend)
+						f->remove();
 				}
 			}
 		}

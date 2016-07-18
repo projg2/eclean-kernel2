@@ -70,7 +70,8 @@ namespace std
 // (on systems not supporting *at() functions, absolute path is used)
 class RelativePath
 {
-	std::shared_ptr<DirectoryStream> dir_;
+	std::shared_ptr<DirectoryStream> dir_own_;
+	const DirectoryStream& dir_;
 	std::string filename_;
 
 	OpenFD file_fd_;
@@ -82,6 +83,8 @@ public:
 	// and reference the file named by filename
 	RelativePath(std::shared_ptr<DirectoryStream> dir,
 			std::string&& filename);
+	// (variant without directory reference-keeping)
+	RelativePath(const DirectoryStream& dir, std::string&& filename);
 
 	// get the filename
 	std::string filename() const;
@@ -106,6 +109,13 @@ public:
 
 	// read the symbolic link
 	std::string readlink() const;
+
+	// unlink the file
+	void unlink() const;
+	// remove the (empty) directory
+	void rmdir() const;
+	// remove the directory recursively
+	void rmdir_recursive() const;
 };
 
 #endif /*EK2_UTIL_RELATIVEPATH_H*/

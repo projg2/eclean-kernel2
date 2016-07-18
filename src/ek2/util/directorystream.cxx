@@ -39,7 +39,7 @@ DirectoryStream::DirectoryStream(const std::string& path)
 DirectoryStream::DirectoryStream(const RelativePath& rpath)
 	: path_(rpath.path())
 {
-	OpenFD fd = rpath.open(O_DIRECTORY);
+	OpenFD fd = rpath.open(O_DIRECTORY | O_NOFOLLOW);
 	dir_ = fdopendir(fd);
 	if (!dir_)
 		throw IOError("Unable to fdopen directory " + path_, errno);
