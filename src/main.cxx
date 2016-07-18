@@ -46,10 +46,13 @@ static void print_help(std::ostream& out, const char* argv0)
 		"Actions:\n"
 		"  -l, --list-kernels      list installed kernels\n"
 		"  -n, --keep-newest N     keep only N newest kernels\n"
-		"Options:\n"
+		"\n"
+		"Configuration:\n"
 		"  -o, --layout <layout>   use specific layout (by name)\n"
 		"  -s, --sort-order <ord>  use specific sort order (mtime, version)\n"
+		"*** 'list' can be used instead of the value to print choices\n"
 		"\n"
+		"Options:\n"
 		"  -p, --pretend           print the plan but do not do anything\n"
 		"\n"
 		"  -h, --help              print this help message\n"
@@ -63,12 +66,30 @@ enum class Action
 	keep_newest,
 };
 
+// print short list of possible values
+static void print_list_short(std::vector<std::pair<std::string, std::string>> l)
+{
+	std::cerr << "Possible values: ";
+	for (const std::pair<std::string, std::string>& kv : l)
+		std::cerr << kv.first << ", ";
+	std::cerr << "list (for detailed info)\n";
+}
+
+// print list of possible values with descriptions
+static void print_list_long(const std::string& option,
+		std::vector<std::pair<std::string, std::string>> l)
+{
+	std::cout << "Possible values for --" << option << ":\n";
+	for (const std::pair<std::string, std::string>& kv : l)
+		std::cout << kv.first << " - " << kv.second << "\n";
+}
+
 int sub_main(int argc, char* argv[])
 {
 	Action act = Action::none;
 	int keep_num;
-	const char* layout = "std";
-	const char* sort_order = "version";
+	std::string layout = "std";
+	std::string sort_order = "version";
 	bool pretend = false;
 
 	while (true)
@@ -153,10 +174,22 @@ int sub_main(int argc, char* argv[])
 		return 1;
 	}
 
+	if (layout == "list")
+	{
+		print_list_long("layout", get_layout_list());
+		return 0;
+	}
+	if (sort_order == "list")
+	{
+		print_list_long("sort-order", get_sort_list());
+		return 0;
+	}
+
 	std::unique_ptr<Layout> l = get_layout(layout);
 	if (!l)
 	{
 		std::cerr << argv[0] << ": unknown layout " << layout << "\n";
+		print_list_short(get_layout_list());
 		return 1;
 	}
 
@@ -164,6 +197,7 @@ int sub_main(int argc, char* argv[])
 	if (!f)
 	{
 		std::cerr << argv[0] << ": unknown sort order " << sort_order << "\n";
+		print_list_short(get_sort_list());
 		return 1;
 	}
 

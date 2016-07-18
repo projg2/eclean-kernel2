@@ -16,9 +16,6 @@
 
 #include <cassert>
 
-typedef std::unordered_map<std::string, fileset_sorting_function>
-sort_getters_type;
-
 static bool mtime_less(const FileSet& a, const FileSet& b)
 {
 	return a.mtime() < b.mtime();
@@ -213,16 +210,34 @@ static bool versions_less(const FileSet& a, const FileSet& b)
 		return false;
 }
 
-static sort_getters_type sort_getters = {
-	{ "mtime", mtime_less },
-	{ "version", versions_less },
+struct sort_info
+{
+	fileset_sorting_function func;
+	std::string desc;
+};
+
+typedef std::unordered_map<std::string, sort_info> sort_list_type;
+
+static sort_list_type sort_list = {
+	{ "mtime", { mtime_less, "Order using oldest file mtime" } },
+	{ "version", { versions_less, "Order by comparing apparent (or internal) versions" } },
 };
 
 fileset_sorting_function get_sorting_function(const std::string& name)
 {
-	sort_getters_type::const_iterator i = sort_getters.find(name);
-	if (i != sort_getters.end())
-		return i->second;
+	sort_list_type::const_iterator i = sort_list.find(name);
+	if (i != sort_list.end())
+		return i->second.func;
 
 	return {};
+}
+
+std::vector<std::pair<std::string, std::string>> get_sort_list()
+{
+	std::vector<std::pair<std::string, std::string>> ret;
+
+	for (const sort_list_type::value_type& l : sort_list)
+		ret.push_back(std::make_pair(l.first, l.second.desc));
+
+	return ret;
 }

@@ -12,22 +12,36 @@
 #include "ek2/layouts/std.h"
 
 #include <functional>
+#include <string>
 #include <unordered_map>
 
-typedef std::function<std::unique_ptr<Layout>()>
-layout_construct_type;
-typedef std::unordered_map<std::string, layout_construct_type>
-layout_getters_type;
+struct layout_info
+{
+	std::function<std::unique_ptr<Layout>()> construct;
+	std::string desc;
+};
 
-layout_getters_type layout_getters = {
-	{ "std", StdLayout::construct },
+typedef std::unordered_map<std::string, layout_info> layout_list_type;
+
+static layout_list_type layout_list = {
+	{ "std", { StdLayout::construct, "Standard /boot layout used by kernel 'make install'" } },
 };
 
 std::unique_ptr<Layout> get_layout(const std::string& name)
 {
-	layout_getters_type::const_iterator i = layout_getters.find(name);
-	if (i != layout_getters.end())
-		return (i->second)();
+	layout_list_type::const_iterator i = layout_list.find(name);
+	if (i != layout_list.end())
+		return (i->second.construct)();
 
 	return nullptr;
+}
+
+std::vector<std::pair<std::string, std::string>> get_layout_list()
+{
+	std::vector<std::pair<std::string, std::string>> ret;
+
+	for (const layout_list_type::value_type& l : layout_list)
+		ret.push_back(std::make_pair(l.first, l.second.desc));
+
+	return ret;
 }
