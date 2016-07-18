@@ -1,0 +1,76 @@
+==============
+eclean-kernel2
+==============
+
+eclean-kernel2 is a simple tool to remove old kernels and stale
+auxiliary kernel files.
+
+*** WARNING: this is an early development version, it may be buggy.
+*** Always use the pretend mode first to avoid accidental removal
+*** of the wrong kernel!
+
+
+Common usage
+------------
+To remove old kernels, keeping ${N} newest:
+
+    eclean-kernel -n ${N} -p
+
+This runs eclean-kernel in pretend mode. It will print the list of files
+it is planning to remove. If it looks correct, execute:
+
+    eclean-kernel -n ${N}
+
+In order to check if eclean-kernel is finding kernels correctly, use
+the list mode:
+
+    eclean-kernel -l
+
+For more options, see:
+
+    eclean-kernel --help
+
+
+Layouts
+-------
+eclean-kernel2 facilitates layouts to support different installs.
+Currently, the only supported layout is 'std'.
+
+std
+~~~
+The typical kernel 'make install' layout. The kernel is installed
+in /boot along with (optional) config, System.map and initramfs/initrd.
+Kernel modules are installed in /lib/modules and build directory can be
+found via a symlink in moduledir.
+
+Kernels are recognized by file magic (i.e. file contents are scanned).
+Other files are recognized using filenames. Files are grouped together
+using 'apparent' and 'internal' versions.
+
+The 'apparent' version is the string after the first hyphen
+in the filename. It is used to group the kernel, System.map, config
+and initramfs together.
+
+The 'internal' version is read from the kernel file. It is used by
+the kernel to find modules, and therefore it is used to match module
+directory (and implicitly build directory).
+
+
+Sort orders
+-----------
+Sort orders are used to determine which kernels are the oldest.
+There are two sort orders implemented currently:
+
+1. version (default) -- attempts to compare apparent versions. If no
+   apparent version is available, compares internal versions.
+
+2. mtime -- compares mtime of the oldest file in the group. The oldest
+   file was chosen because e.g. if two kernels share the same module
+   directory, the modules will have the timestamp of the newer kernel.
+
+
+Reporting bugs
+--------------
+Please report bugs at https://github.com/mgorny/eclean-kernel2. Please
+try to provide as many details as possible, including your system
+layout and the output of 'eclean-kernel -l'.
