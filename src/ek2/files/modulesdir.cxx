@@ -28,7 +28,7 @@ const std::string& ModulesDir::type() const
 std::shared_ptr<RelativePath> ModulesDir::build_path()
 {
 	std::shared_ptr<DirectoryStream> ds{
-		new DirectoryStream(path_)};
+		new DirectoryStream(*path_)};
 	RelativePath rp{ds, "build"};
 	std::shared_ptr<RelativePath> ret;
 

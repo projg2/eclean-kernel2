@@ -36,12 +36,14 @@ DirectoryStream::DirectoryStream(const std::string& path)
 		throw IOError("Unable to open directory " + path, errno);
 }
 
-DirectoryStream::DirectoryStream(std::shared_ptr<RelativePath> rpath)
-	: dir_(fdopendir(rpath->file_fd(O_DIRECTORY))), path_(rpath->path()),
-		parent_directory_(rpath)
+DirectoryStream::DirectoryStream(const RelativePath& rpath)
+	: path_(rpath.path())
 {
+	OpenFD fd = rpath.open(O_DIRECTORY);
+	dir_ = fdopendir(fd);
 	if (!dir_)
 		throw IOError("Unable to fdopen directory " + path_, errno);
+	fd.disown();
 }
 
 DirectoryStream::~DirectoryStream()

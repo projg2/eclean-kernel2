@@ -52,6 +52,11 @@ OpenFD::operator int() const
 	return fd_;
 }
 
+void OpenFD::disown()
+{
+	fd_ = -1;
+}
+
 FileID::FileID(const struct stat& st)
 	: dev_(st.st_dev), ino_(st.st_ino)
 {
@@ -87,6 +92,22 @@ std::string RelativePath::path() const
 	return dir_->path_ + '/' + filename_;
 }
 
+OpenFD RelativePath::open(int flags) const
+{
+	int ret;
+
+#if defined(HAVE_OPENAT)
+	assert(dir_->dir_);
+	ret = openat(dirfd(dir_->dir_), filename_.c_str(), flags);
+#else
+	ret = ::open(path().c_str(), flags);
+#endif
+
+	if (ret == -1)
+		throw IOError("Unable to open " + path(), errno);
+	return ret;
+}
+
 int RelativePath::file_fd(int flags)
 {
 	if (file_fd_ != -1 && flags != open_mode_)
@@ -94,16 +115,7 @@ int RelativePath::file_fd(int flags)
 
 	if (file_fd_ == -1)
 	{
-#if defined(HAVE_OPENAT)
-		assert(dir_->dir_);
-		file_fd_ = openat(dirfd(dir_->dir_), filename_.c_str(), flags);
-#else
-		file_fd_ = ::open(path().c_str(), flags);
-#endif
-
-		if (file_fd_ == -1)
-			throw IOError("Unable to open " + path(), errno);
-
+		file_fd_ = open(flags);
 		open_mode_ = flags;
 	}
 

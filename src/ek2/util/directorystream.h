@@ -27,7 +27,6 @@ class DirectoryStream
 	DIR* dir_;
 	const struct dirent* ent_;
 	std::string path_;
-	std::shared_ptr<RelativePath> parent_directory_;
 
 	friend class RelativePath;
 
@@ -38,7 +37,7 @@ public:
 	DirectoryStream(const std::string& path);
 	// create a directory stream using relative path
 	// i.e. open a subdirectory
-	DirectoryStream(std::shared_ptr<RelativePath> rpath);
+	DirectoryStream(const RelativePath& rpath);
 	// destroy the directory stream
 	// closes if it necessary; however, prefer calling close() explicitly
 	// since this does not provide a way to check for errors

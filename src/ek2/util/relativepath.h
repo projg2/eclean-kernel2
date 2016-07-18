@@ -34,6 +34,9 @@ public:
 	OpenFD& operator=(OpenFD&&);
 
 	operator int() const;
+
+	// disown the fd, i.e. prevent the class from closing it
+	void disown();
 };
 
 // Struct useful for identifying the file on disk
@@ -85,6 +88,9 @@ public:
 	// get the full path
 	std::string path() const;
 
+	// open file exclusively and return the fd
+	// the fd is not shared and any shared fd is disregarded
+	OpenFD open(int flags) const;
 	// return the shared fd for file open in given mode
 	// if the file is not open yet, it is opened
 	// if it is open in a weaker mode, it is reopened
