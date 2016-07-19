@@ -28,7 +28,7 @@ void list_kernels(const Layout& l)
 {
 	for (const FileSet& fs : l.kernels())
 	{
-		std::cerr << pretty_version(fs) << ':';
+		std::cerr << pretty_version(fs) << ":\n";
 		for (const std::shared_ptr<File>& f : fs.files())
 			std::cerr << "- " << f->type() << ": " << f->path() << "\n";
 	}
