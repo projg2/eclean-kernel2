@@ -84,12 +84,15 @@ bool StdLayout::find_kernels(const std::string& boot_path,
 		std::shared_ptr<ModulesDir> f{
 			new ModulesDir(rpath)};
 
-		module_map[f->filename()] = {f};
-
 		std::shared_ptr<RelativePath> build_path{f->build_path()};
 		if (build_path)
 			module_map[f->filename()].push_back(
 					BuildDir::try_construct(build_path));
+
+		// add moduledir after dependant dirs
+		// otherwise moduledir will be removed first and a later failure
+		// would make it impossible to find builddir again
+		module_map[f->filename()].push_back(f);
 	}
 
 	// collect all kernel files from /boot
