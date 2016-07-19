@@ -152,7 +152,7 @@ bool StdLayout::find_kernels(const std::string& boot_path,
 						= module_map.find(internal_ver);
 					if (mi != module_map.end())
 					{
-						std::move(mi->second.begin(), mi->second.end(),
+						std::copy(mi->second.begin(), mi->second.end(),
 								std::back_inserter(fset.files()));
 					}
 				}
