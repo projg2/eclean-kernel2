@@ -59,11 +59,9 @@ static std::string find_version(const std::string& fn)
 	return {};
 }
 
-bool StdLayout::find_kernels()
+bool StdLayout::find_kernels(const std::string& boot_path,
+			const std::string& module_path)
 {
-	const std::string boot_path{"/boot"};
-	const std::string modules_path{"/lib/modules"};
-
 	std::unordered_map<std::string, FileSet> file_map;
 	typedef std::unordered_map<std::string,
 			std::vector<std::shared_ptr<File>>>
@@ -71,7 +69,7 @@ bool StdLayout::find_kernels()
 	module_map_type module_map;
 
 	// collect all moduledirs first
-	modules_dir_.reset(new DirectoryStream(modules_path));
+	modules_dir_.reset(new DirectoryStream(module_path));
 	while (modules_dir_->read())
 	{
 		// skip ., .. and all hidden files

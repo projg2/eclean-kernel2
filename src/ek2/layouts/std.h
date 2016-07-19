@@ -30,7 +30,8 @@ public:
 	// allocate and construct a new StdLayout
 	static std::unique_ptr<Layout> construct();
 
-	virtual bool find_kernels();
+	virtual bool find_kernels(const std::string& boot_path,
+			const std::string& module_path);
 
 	virtual std::vector<FileSet>& kernels();
 	virtual const std::vector<FileSet>& kernels() const;

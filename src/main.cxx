@@ -24,13 +24,16 @@ extern "C"
 #	include <getopt.h>
 };
 
-static const char* short_options = "ln:o:s:phV";
+static const char* short_options = "ln:o:s:B:M:phV";
 static const struct option long_options[] = {
 	{ "list-kernels", no_argument, nullptr, 'l' },
 	{ "keep-newest", required_argument, nullptr, 'n' },
 
 	{ "layout", required_argument, nullptr, 'o' },
 	{ "sort-order", required_argument, nullptr, 's' },
+
+	{ "boot-path", required_argument, nullptr, 'B' },
+	{ "module-path", required_argument, nullptr, 'M' },
 
 	{ "pretend", no_argument, nullptr, 'p' },
 
@@ -51,6 +54,10 @@ static void print_help(std::ostream& out, const char* argv0)
 		"  -o, --layout <layout>   use specific layout (by name)\n"
 		"  -s, --sort-order <ord>  use specific sort order (mtime, version)\n"
 		"*** 'list' can be used instead of the value to print choices\n"
+		"\n"
+		"Path overrides:\n"
+		"  -B, --boot-path <path>  alternate path for kernels (def: /boot)\n"
+		"  -M, --module-path <p>   alternate path for modules (def: /lib/modules)\n"
 		"\n"
 		"Options:\n"
 		"  -p, --pretend           print the plan but do not do anything\n"
@@ -90,6 +97,8 @@ int sub_main(int argc, char* argv[])
 	int keep_num;
 	std::string layout = "std";
 	std::string sort_order = "version";
+	std::string boot_path = "/boot";
+	std::string module_path = "/lib/modules";
 	bool pretend = false;
 
 	while (true)
@@ -142,6 +151,13 @@ int sub_main(int argc, char* argv[])
 				break;
 			case 's':
 				sort_order = optarg;
+				break;
+
+			case 'B':
+				boot_path = optarg;
+				break;
+			case 'M':
+				module_path = optarg;
 				break;
 
 			case 'p':
@@ -201,7 +217,7 @@ int sub_main(int argc, char* argv[])
 		return 1;
 	}
 
-	l->find_kernels();
+	l->find_kernels(boot_path, module_path);
 	std::sort(l->kernels().begin(), l->kernels().end(), f);
 
 	switch (act)

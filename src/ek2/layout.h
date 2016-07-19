@@ -20,7 +20,8 @@ public:
 	// find kernels and store them internally
 	// may output to stderr
 	// returns true on success, false if fatal error occured
-	virtual bool find_kernels() = 0;
+	virtual bool find_kernels(const std::string& boot_path,
+			const std::string& module_path) = 0;
 
 	// get final kernel list
 	virtual std::vector<FileSet>& kernels() = 0;
