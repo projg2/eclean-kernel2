@@ -50,13 +50,43 @@ static std::array<std::string, 4> supported_prefixes{
 	"initrd-",
 };
 
+// lowercase supported filename suffixes (to be stripped from version)
+// TODO: something more universal?
+static std::array<std::string, 5> supported_suffixes{
+	".img", // initramfs
+	// assume config* may be compressed
+	".gz",
+	".bz2",
+	".lz",
+	".xz",
+};
+
 static std::string find_version(const std::string& fn)
 {
-	std::string::size_type sep_pos = fn.find('-');
+	// find the version separator
+	std::string::const_iterator sep_pos
+		= std::find(fn.begin(), fn.end(), '-');
 
-	if (sep_pos != fn.npos)
-		return fn.substr(sep_pos+1);
-	return {};
+	if (sep_pos == fn.end())
+		return {};
+	++sep_pos;
+
+	// find a possible suffix
+	std::string::const_iterator sfx_pos = fn.end();
+	for (const std::string& sfx : supported_suffixes)
+	{
+		if (std::distance(sep_pos, fn.end()) < sfx.size())
+			continue;
+
+		std::string::const_iterator p_sfx_pos = fn.end() - sfx.size();
+		if (std::equal(sfx.begin(), sfx.end(), p_sfx_pos, ascii_iequal))
+		{
+			sfx_pos = p_sfx_pos;
+			break;
+		}
+	}
+
+	return {sep_pos, sfx_pos};
 }
 
 bool StdLayout::find_kernels(const std::string& boot_path,
