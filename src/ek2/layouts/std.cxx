@@ -20,9 +20,15 @@
 #include <memory>
 #include <vector>
 
-std::unique_ptr<Layout> StdLayout::construct()
+StdLayout::StdLayout(const Options& opts)
+	: Layout(opts)
 {
-	return std::unique_ptr<Layout>{static_cast<Layout*>(new StdLayout())};
+}
+
+std::unique_ptr<Layout> StdLayout::construct(const Options& opts)
+{
+	return std::unique_ptr<Layout>{
+		static_cast<Layout*>(new StdLayout(opts))};
 }
 
 // perform case-insensitive comparison of filename and prefix
@@ -89,9 +95,11 @@ static std::string find_version(const std::string& fn)
 	return {sep_pos, sfx_pos};
 }
 
-bool StdLayout::find_kernels(const std::string& boot_path,
-			const std::string& module_path)
+bool StdLayout::find_kernels()
 {
+	const std::string& boot_path = opts_.boot_path;
+	const std::string& module_path = opts_.module_path;
+
 	std::unordered_map<std::string, FileSet> file_map;
 	typedef std::unordered_map<std::string,
 			std::vector<std::shared_ptr<File>>>

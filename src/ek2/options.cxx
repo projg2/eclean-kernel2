@@ -7,9 +7,4 @@
 #	include "config.h"
 #endif
 
-#include "ek2/layout.h"
-
-Layout::Layout(const Options& opts)
-	: opts_(opts)
-{
-}
+#include "ek2/options.h"

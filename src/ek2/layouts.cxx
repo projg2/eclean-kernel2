@@ -17,7 +17,7 @@
 
 struct layout_info
 {
-	std::function<std::unique_ptr<Layout>()> construct;
+	std::function<std::unique_ptr<Layout>(const Options& opts)> construct;
 	std::string desc;
 };
 
@@ -27,11 +27,11 @@ static layout_list_type layout_list = {
 	{ "std", { StdLayout::construct, "Standard /boot layout used by kernel 'make install'" } },
 };
 
-std::unique_ptr<Layout> get_layout(const std::string& name)
+std::unique_ptr<Layout> get_layout(const std::string& name, const Options& opts)
 {
 	layout_list_type::const_iterator i = layout_list.find(name);
 	if (i != layout_list.end())
-		return (i->second.construct)();
+		return (i->second.construct)(opts);
 
 	return nullptr;
 }

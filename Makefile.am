@@ -25,6 +25,8 @@ eclean_kernel_SOURCES = \
 	src/ek2/layouts/std.h \
 	src/ek2/layouts.cxx \
 	src/ek2/layouts.h \
+	src/ek2/options.cxx \
+	src/ek2/options.h \
 	src/ek2/sorts.cxx \
 	src/ek2/sorts.h \
 	src/ek2/util/directorystream.cxx \

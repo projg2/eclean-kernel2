@@ -10,6 +10,7 @@
 #include "ek2/actions.h"
 #include "ek2/layout.h"
 #include "ek2/layouts.h"
+#include "ek2/options.h"
 #include "ek2/sorts.h"
 #include "ek2/util/error.h"
 
@@ -97,9 +98,12 @@ int sub_main(int argc, char* argv[])
 	int keep_num;
 	std::string layout = "std";
 	std::string sort_order = "version";
-	std::string boot_path = "/boot";
-	std::string module_path = "/lib/modules";
 	bool pretend = false;
+
+	Options opts = {
+		"/boot", // boot_path
+		"/lib/modules", // module_path
+	};
 
 	while (true)
 	{
@@ -154,10 +158,10 @@ int sub_main(int argc, char* argv[])
 				break;
 
 			case 'B':
-				boot_path = optarg;
+				opts.boot_path = optarg;
 				break;
 			case 'M':
-				module_path = optarg;
+				opts.module_path = optarg;
 				break;
 
 			case 'p':
@@ -201,7 +205,7 @@ int sub_main(int argc, char* argv[])
 		return 0;
 	}
 
-	std::unique_ptr<Layout> l = get_layout(layout);
+	std::unique_ptr<Layout> l = get_layout(layout, opts);
 	if (!l)
 	{
 		std::cerr << argv[0] << ": unknown layout " << layout << "\n";
@@ -217,7 +221,7 @@ int sub_main(int argc, char* argv[])
 		return 1;
 	}
 
-	l->find_kernels(boot_path, module_path);
+	l->find_kernels();
 	std::sort(l->kernels().begin(), l->kernels().end(), f);
 
 	switch (act)

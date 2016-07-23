@@ -10,6 +10,7 @@
 
 #include "ek2/fileset.h"
 #include "ek2/layout.h"
+#include "ek2/options.h"
 #include "ek2/util/directorystream.h"
 
 #include <memory>
@@ -27,11 +28,12 @@ class StdLayout : public Layout
 	std::vector<FileSet> kernels_;
 
 public:
-	// allocate and construct a new StdLayout
-	static std::unique_ptr<Layout> construct();
+	StdLayout(const Options& opts);
 
-	virtual bool find_kernels(const std::string& boot_path,
-			const std::string& module_path);
+	// allocate and construct a new StdLayout
+	static std::unique_ptr<Layout> construct(const Options& opts);
+
+	virtual bool find_kernels();
 
 	virtual std::vector<FileSet>& kernels();
 	virtual const std::vector<FileSet>& kernels() const;
