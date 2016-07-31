@@ -64,7 +64,8 @@ std::shared_ptr<File> KernelFile::try_construct(
 	if (!std::equal(kernel_magic.begin(), kernel_magic.end(), buf.begin() + 2))
 		return nullptr;
 
-	uint16_t offset = buf[0x0f] << 8 | buf[0x0e];
+	uint16_t offset = static_cast<uint8_t>(buf[0x0f]) << 8
+		| static_cast<uint8_t>(buf[0x0e]);
 	if (offset != 0)
 	{
 		offset += 0x200;
