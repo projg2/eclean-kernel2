@@ -127,10 +127,12 @@ static bool numeric_less(const VersionComponent& a, const VersionComponent& b)
 	std::string::const_iterator bi = b.begin;
 
 	// if B is longer and does not start with a_pad zeros => A < B
-	if (compare_with_padded_zeros(bi, a_pad))
+	if (b_pad > a_pad && compare_with_padded_zeros(bi, b_pad))
 		return true;
+	else
+
 	// if A is longer and does not start with b_pad zeros => A > B
-	if (compare_with_padded_zeros(ai, b_pad))
+	if (a_pad > b_pad && compare_with_padded_zeros(ai, a_pad))
 		return false;
 
 	// now iterators should be in sync
