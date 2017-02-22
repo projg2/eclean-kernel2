@@ -91,8 +91,12 @@ static void print_list_long(const std::string& option,
 		std::cout << kv.first << " - " << kv.second << "\n";
 }
 
+bool version_less(const std::string& a, const std::string& b);
 int sub_main(int argc, char* argv[])
 {
+	std::cerr << version_less("07", "0008") << std::endl;
+	return 0;
+
 	Action act = Action::none;
 	int keep_num;
 	std::string layout = "std";

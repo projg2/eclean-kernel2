@@ -146,7 +146,7 @@ static bool numeric_less(const VersionComponent& a, const VersionComponent& b)
 }
 
 // check if version string a < b
-static bool version_less(const std::string& a, const std::string& b)
+bool version_less(const std::string& a, const std::string& b)
 {
 	std::string::const_iterator
 		a_pos = a.begin(),
