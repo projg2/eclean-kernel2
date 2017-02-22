@@ -117,11 +117,11 @@ static bool numeric_less(const VersionComponent& a, const VersionComponent& b)
 {
 	std::string::size_type a_len = a.end - a.begin;
 	std::string::size_type b_len = b.end - b.begin;
-	std::string::size_type min_len = std::min(a_len, b_len);
+	std::string::size_type max_len = std::max(a_len, b_len);
 
 	// determine the necessary left-padding
-	std::string::size_type a_pad = a_len - min_len;
-	std::string::size_type b_pad = b_len - min_len;
+	std::string::size_type a_pad = max_len - a_len;
+	std::string::size_type b_pad = max_len - b_len;
 
 	std::string::const_iterator ai = a.begin;
 	std::string::const_iterator bi = b.begin;
