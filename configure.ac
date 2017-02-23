@@ -1,5 +1,5 @@
 AC_PREREQ([2.60])
-AC_INIT([eclean-kernel], [1.99.1])
+AC_INIT([eclean-kernel], [1.99.3])
 AC_CONFIG_AUX_DIR([build-aux])
 AC_CONFIG_MACRO_DIR([build-aux])
 AM_INIT_AUTOMAKE([1.6 foreign dist-bzip2 subdir-objects])
