@@ -22,7 +22,8 @@ std::unique_ptr<Judge> KeepNewest::construct(const Options& opts)
 		static_cast<Judge*>(new KeepNewest(opts))};
 }
 
-void KeepNewest::judge(fileset_vote_map& fileset_map) const
+void KeepNewest::judge(fileset_vote_map& fileset_map,
+			file_vote_map&) const
 {
 	assert(opts_.keep_newest >= 0);
 	int to_remove = fileset_map.size() - opts_.keep_newest;

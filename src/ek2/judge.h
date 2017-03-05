@@ -15,6 +15,7 @@
 
 #include <memory>
 #include <string>
+#include <unordered_map>
 #include <vector>
 
 // a single vote upon a kernel or a file
@@ -43,6 +44,7 @@ struct FileSetVoteSet
 };
 
 typedef std::vector<FileSetVoteSet> fileset_vote_map;
+typedef std::unordered_map<FileID, std::vector<Vote>> file_vote_map;
 
 class Judge
 {
@@ -51,7 +53,8 @@ protected:
 	Judge(const Options& opts);
 
 public:
-	virtual void judge(fileset_vote_map& fileset_map) const = 0;
+	virtual void judge(fileset_vote_map& fileset_map,
+			file_vote_map& file_map) const = 0;
 };
 
 #endif /*EK2_JUDGE_H*/

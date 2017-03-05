@@ -9,6 +9,7 @@
 
 #include "ek2/judges.h"
 
+#include "ek2/judges/keepcommonfiles.h"
 #include "ek2/judges/keepnewest.h"
 
 #include <functional>
@@ -25,6 +26,8 @@ typedef std::vector<judge_info> judge_list_type;
 
 static const judge_list_type judge_list = {
 	{ "keep-newest", KeepNewest::construct },
+
+	{ "keep-common-files", KeepCommonFiles::construct },
 };
 
 std::vector<std::unique_ptr<Judge>> get_judges(const Options& opts)

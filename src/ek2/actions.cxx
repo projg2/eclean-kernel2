@@ -32,9 +32,9 @@ void list_kernels(const Layout& l)
 
 void remove(Layout& l, const Options& opts)
 {
-	std::vector<std::unique_ptr<Judge>> judges
-		= get_judges(opts);
+	std::vector<std::unique_ptr<Judge>> judges = get_judges(opts);
 	fileset_vote_map fileset_votes;
+	file_vote_map file_votes;
 
 	// pre-fill the map with kernels, in order
 	for (FileSet& fs : l.kernels())
@@ -42,37 +42,16 @@ void remove(Layout& l, const Options& opts)
 	assert(fileset_votes.size() == l.kernels().size());
 
 	for (const std::unique_ptr<Judge>& j : judges)
-		j->judge(fileset_votes);
+		j->judge(fileset_votes, file_votes);
 
 	// check which kernels to remove, which to keep
 	// count the former, collect files needed for the latter
 	size_t to_remove = 0;
-	typedef std::unordered_map<FileID, std::vector<std::string>>
-		file_use_map_type;
-	file_use_map_type file_use_map;
 
 	for (const FileSetVoteSet& fsv : fileset_votes)
 	{
 		if (!fsv.votes.empty() && fsv.votes.back().remove)
 			++to_remove;
-		else // keep!
-		{
-			std::string v{fsv.key->pretty_version()};
-			// store list of files to keep w/ reasons
-			for (const std::shared_ptr<File>& f : fsv.key->files())
-			{
-				try
-				{
-					file_use_map[f->id()].push_back(v);
-				}
-				catch (const IOError& e)
-				{
-					// skip missing files
-					if (e.err() != ENOENT)
-						throw;
-				}
-			}
-		}
 	}
 
 	bool pretend = opts.pretend;
@@ -99,6 +78,7 @@ void remove(Layout& l, const Options& opts)
 	for (FileSetVoteSet& fsv : fileset_votes)
 	{
 		// keeping this kernel
+		// TODO: support file removal for non-removed kernels?
 		if (fsv.votes.empty() || !fsv.votes.back().remove)
 			continue;
 
@@ -113,10 +93,10 @@ void remove(Layout& l, const Options& opts)
 		std::cerr << "Files:\n";
 		for (std::shared_ptr<File>& f : fsv.key->files())
 		{
-			file_use_map_type::iterator file_used;
+			file_vote_map::iterator file_vote;
 			try
 			{
-				file_used = file_use_map.find(f->id());
+				file_vote = file_votes.find(f->id());
 			}
 			catch (const IOError& e)
 			{
@@ -131,14 +111,14 @@ void remove(Layout& l, const Options& opts)
 			}
 
 			// file used by kept kernels
-			if (file_used != file_use_map.end())
+			if (file_vote != file_votes.end()
+					&& !file_vote->second.empty()
+					&& !file_vote->second.back().remove)
 			{
-				std::cerr << "+ " << f->path() << " (keeping, used also by: "
-					<< file_used->second.back();
-				if (file_used->second.size() > 1)
-					std::cerr << " and " << file_used->second.size() - 1
-						<< " more kernel(s)";
-				std::cerr << ')' << std::endl;
+				// TODO: support multiple reasons
+				std::cerr << "+ " << f->path()
+					<< " (" << file_vote->second.back().reason << ')'
+					<< std::endl;
 			}
 			else
 			{

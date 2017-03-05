@@ -5,19 +5,19 @@
 
 #pragma once
 
-#ifndef EK2_JUDGES_KEEPNEWEST_H
-#define EK2_JUDGES_KEEPNEWEST_H 1
+#ifndef EK2_JUDGES_KEEPCOMMONFILES_H
+#define EK2_JUDGES_KEEPCOMMONFILES_H 1
 
 #include "ek2/judge.h"
 
-class KeepNewest : public Judge
+class KeepCommonFiles : public Judge
 {
 public:
-	KeepNewest(const Options& opts);
+	KeepCommonFiles(const Options& opts);
 	static std::unique_ptr<Judge> construct(const Options& opts);
 
 	virtual void judge(fileset_vote_map& fileset_map,
-			file_vote_map&) const;
+			file_vote_map& file_map) const;
 };
 
-#endif /*EK2_JUDGES_KEEPNEWEST_H*/
+#endif /*EK2_JUDGES_KEEPCOMMONFILES_H*/
