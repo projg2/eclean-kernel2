@@ -25,6 +25,8 @@ eclean_kernel_SOURCES = \
 	src/ek2/judges/keepcommonfiles.h \
 	src/ek2/judges/keepnewest.cxx \
 	src/ek2/judges/keepnewest.h \
+	src/ek2/judges/protectrunning.cxx \
+	src/ek2/judges/protectrunning.h \
 	src/ek2/judges.cxx \
 	src/ek2/judges.h \
 	src/ek2/layout.cxx \

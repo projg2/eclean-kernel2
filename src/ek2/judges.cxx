@@ -11,6 +11,7 @@
 
 #include "ek2/judges/keepcommonfiles.h"
 #include "ek2/judges/keepnewest.h"
+#include "ek2/judges/protectrunning.h"
 
 #include <functional>
 #include <memory>
@@ -26,6 +27,7 @@ typedef std::vector<judge_info> judge_list_type;
 
 static const judge_list_type judge_list = {
 	{ "keep-newest", KeepNewest::construct },
+	{ "protect-running", ProtectRunning::construct },
 
 	{ "keep-common-files", KeepCommonFiles::construct },
 };
