@@ -58,3 +58,11 @@ time_t FileSet::mtime() const
 	assert(least_mtime != 0);
 	return least_mtime;
 }
+
+std::string FileSet::pretty_version() const
+{
+	if (!apparent_version_.empty())
+		return apparent_version_;
+	else
+		return '[' + internal_version_ + ']';
+}

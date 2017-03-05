@@ -20,19 +20,11 @@
 #include <unordered_map>
 #include <vector>
 
-static std::string pretty_version(const FileSet& fs)
-{
-	if (!fs.apparent_version().empty())
-		return fs.apparent_version();
-	else
-		return '[' + fs.internal_version() + ']';
-}
-
 void list_kernels(const Layout& l)
 {
 	for (const FileSet& fs : l.kernels())
 	{
-		std::cerr << pretty_version(fs) << ":\n";
+		std::cerr << fs.pretty_version() << ":\n";
 		for (const std::shared_ptr<File>& f : fs.files())
 			std::cerr << "- " << f->type() << ": " << f->path() << "\n";
 	}
@@ -65,7 +57,7 @@ void remove(Layout& l, const Options& opts)
 			++to_remove;
 		else // keep!
 		{
-			std::string v{pretty_version(*fsv.key)};
+			std::string v{fsv.key->pretty_version()};
 			// store list of files to keep w/ reasons
 			for (const std::shared_ptr<File>& f : fsv.key->files())
 			{
@@ -110,7 +102,7 @@ void remove(Layout& l, const Options& opts)
 		if (fsv.votes.empty() || !fsv.votes.back().remove)
 			continue;
 
-		std::cerr << "\n== " << pretty_version(*fsv.key) << " ==\n"
+		std::cerr << "\n== " << fsv.key->pretty_version() << " ==\n"
 			"Rationale:\n";
 		for (const Vote& v : fsv.votes)
 		{

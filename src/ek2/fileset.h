@@ -42,6 +42,9 @@ public:
 
 	// get mtime (for sorting)
 	time_t mtime() const;
+
+	// get pretty-printed version string
+	std::string pretty_version() const;
 };
 
 #endif /*EK2_FILESET_H*/
