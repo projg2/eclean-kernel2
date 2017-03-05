@@ -1,5 +1,5 @@
 /* eclean-kernel2
- * (c) 2016 Michał Górny
+ * (c) 2017 Michał Górny
  * 2-clause BSD license
  */
 
@@ -15,6 +15,10 @@ struct Options
 {
 	std::string boot_path;
 	std::string module_path;
+
+	bool pretend;
+	// newest kernels to keep, 0 to disable removing old
+	int keep_newest;
 };
 
 #endif /*EK2_OPTIONS_H*/

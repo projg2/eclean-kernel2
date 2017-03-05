@@ -1,5 +1,5 @@
 /* eclean-kernel2
- * (c) 2016 Michał Górny
+ * (c) 2017 Michał Górny
  * 2-clause BSD license
  */
 
@@ -11,6 +11,6 @@
 #include "ek2/layout.h"
 
 void list_kernels(const Layout& l);
-void keep_newest(Layout& l, int keep_num, bool pretend);
+void remove(Layout& l, const Options& opts);
 
 #endif /*EK2_ACTIONS_H*/

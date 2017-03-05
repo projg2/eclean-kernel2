@@ -19,6 +19,12 @@ eclean_kernel_SOURCES = \
 	src/ek2/files/modulesdir.h \
 	src/ek2/fileset.cxx \
 	src/ek2/fileset.h \
+	src/ek2/judge.cxx \
+	src/ek2/judge.h \
+	src/ek2/judges/keepnewest.cxx \
+	src/ek2/judges/keepnewest.h \
+	src/ek2/judges.cxx \
+	src/ek2/judges.h \
 	src/ek2/layout.cxx \
 	src/ek2/layout.h \
 	src/ek2/layouts/std.cxx \

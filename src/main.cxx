@@ -1,5 +1,5 @@
 /* eclean-kernel2
- * (c) 2016 Michał Górny
+ * (c) 2017 Michał Górny
  * 2-clause BSD license
  */
 
@@ -28,6 +28,7 @@ extern "C"
 static const char* short_options = "ln:o:s:B:M:phV";
 static const struct option long_options[] = {
 	{ "list-kernels", no_argument, nullptr, 'l' },
+
 	{ "keep-newest", required_argument, nullptr, 'n' },
 
 	{ "layout", required_argument, nullptr, 'o' },
@@ -49,7 +50,10 @@ static void print_help(std::ostream& out, const char* argv0)
 	out << "Usage: " << argv0 << " [options] <action>\n"
 		"Actions:\n"
 		"  -l, --list-kernels      list installed kernels\n"
+		"\n"
+		"Removal options:\n"
 		"  -n, --keep-newest N     keep only N newest kernels\n"
+		"  -p, --pretend           print the plan but do not do anything\n"
 		"\n"
 		"Configuration:\n"
 		"  -o, --layout <layout>   use specific layout (by name)\n"
@@ -61,8 +65,6 @@ static void print_help(std::ostream& out, const char* argv0)
 		"  -M, --module-path <p>   alternate path for modules (def: /lib/modules)\n"
 		"\n"
 		"Options:\n"
-		"  -p, --pretend           print the plan but do not do anything\n"
-		"\n"
 		"  -h, --help              print this help message\n"
 		"  -V, --version           print program version\n";
 }
@@ -71,7 +73,7 @@ enum class Action
 {
 	none,
 	list_kernels,
-	keep_newest,
+	remove,
 };
 
 // print short list of possible values
@@ -95,14 +97,15 @@ static void print_list_long(const std::string& option,
 int sub_main(int argc, char* argv[])
 {
 	Action act = Action::none;
-	int keep_num;
 	std::string layout = "std";
 	std::string sort_order = "version";
-	bool pretend = false;
 
 	Options opts = {
 		"/boot", // boot_path
 		"/lib/modules", // module_path
+
+		false, // pretend
+		0, // keep_newest
 	};
 
 	while (true)
@@ -123,15 +126,9 @@ int sub_main(int argc, char* argv[])
 				act = Action::list_kernels;
 				break;
 			case 'n':
-				if (act != Action::none)
-				{
-					std::cerr << argv[0] << ": multiple actions specified\n";
-					return 1;
-				}
-				act = Action::keep_newest;
 				try
 				{
-					keep_num = std::stoul(optarg);
+					opts.keep_newest = std::stoul(optarg);
 				}
 				catch (std::invalid_argument& e)
 				{
@@ -143,7 +140,7 @@ int sub_main(int argc, char* argv[])
 					std::cerr << argv[0] << ": number out of range: " << optarg << "\n";
 					return 1;
 				}
-				if (keep_num <= 0)
+				if (opts.keep_newest <= 0)
 				{
 					std::cerr << argv[0] << ": number must be positive: " << optarg << "\n";
 					return 1;
@@ -165,7 +162,7 @@ int sub_main(int argc, char* argv[])
 				break;
 
 			case 'p':
-				pretend = true;
+				opts.pretend = true;
 				break;
 
 			case 'h':
@@ -181,10 +178,7 @@ int sub_main(int argc, char* argv[])
 	}
 
 	if (act == Action::none)
-	{
-		std::cerr << argv[0] << ": no action specified\n";
-		return 1;
-	}
+		act = Action::remove;
 
 	if (optind != argc)
 	{
@@ -232,8 +226,8 @@ int sub_main(int argc, char* argv[])
 		case Action::list_kernels:
 			list_kernels(*l);
 			break;
-		case Action::keep_newest:
-			keep_newest(*l, keep_num, pretend);
+		case Action::remove:
+			remove(*l, opts);
 			break;
 	}
 
