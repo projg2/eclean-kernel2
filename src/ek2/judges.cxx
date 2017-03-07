@@ -9,6 +9,7 @@
 
 #include "ek2/judges.h"
 
+#include "ek2/judges/cleanstale.h"
 #include "ek2/judges/keepcommonfiles.h"
 #include "ek2/judges/keepnewest.h"
 #include "ek2/judges/protectrunning.h"
@@ -26,6 +27,7 @@ struct judge_info
 typedef std::vector<judge_info> judge_list_type;
 
 static const judge_list_type judge_list = {
+	{ "clean-stale", CleanStale::construct },
 	{ "keep-newest", KeepNewest::construct },
 	{ "protect-running", ProtectRunning::construct },
 
