@@ -10,7 +10,6 @@
 
 #include "ek2/file.h"
 #include "ek2/fileset.h"
-#include "ek2/layout.h"
 #include "ek2/options.h"
 
 #include <memory>
