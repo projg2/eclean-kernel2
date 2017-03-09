@@ -8,6 +8,7 @@
 #endif
 
 #include "ek2/actions.h"
+#include "ek2/bootloaders.h"
 #include "ek2/layout.h"
 #include "ek2/layouts.h"
 #include "ek2/options.h"
@@ -215,6 +216,8 @@ int sub_main(int argc, char* argv[])
 		return 1;
 	}
 
+	std::vector<std::unique_ptr<BootLoader>> bootloaders = get_bootloaders(opts);
+
 	l->find_kernels();
 	std::sort(l->kernels().begin(), l->kernels().end(), f);
 
@@ -227,7 +230,7 @@ int sub_main(int argc, char* argv[])
 			list_kernels(*l);
 			break;
 		case Action::remove:
-			remove(*l, opts);
+			remove(*l, opts, bootloaders);
 			break;
 	}
 

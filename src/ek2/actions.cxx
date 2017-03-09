@@ -30,7 +30,8 @@ void list_kernels(const Layout& l)
 	}
 }
 
-void remove(Layout& l, const Options& opts)
+void remove(Layout& l, const Options& opts,
+		std::vector<std::unique_ptr<BootLoader>>& bootloaders)
 {
 	std::vector<std::unique_ptr<Judge>> judges = get_judges(opts);
 	fileset_vote_map fileset_votes;
@@ -128,4 +129,7 @@ void remove(Layout& l, const Options& opts)
 			}
 		}
 	}
+
+	for (std::unique_ptr<BootLoader>& b : bootloaders)
+		b->postrm();
 }

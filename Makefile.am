@@ -7,6 +7,12 @@ bin_PROGRAMS = eclean-kernel
 eclean_kernel_SOURCES = \
 	src/ek2/actions.cxx \
 	src/ek2/actions.h \
+	src/ek2/bootloader.cxx \
+	src/ek2/bootloader.h \
+	src/ek2/bootloaders/grub2.cxx \
+	src/ek2/bootloaders/grub2.h \
+	src/ek2/bootloaders.cxx \
+	src/ek2/bootloaders.h \
 	src/ek2/file.cxx \
 	src/ek2/file.h \
 	src/ek2/files/builddir.cxx \
