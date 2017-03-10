@@ -53,4 +53,6 @@ eclean_kernel_SOURCES = \
 	src/ek2/util/error.h \
 	src/ek2/util/relativepath.cxx \
 	src/ek2/util/relativepath.h \
+	src/ek2/util/subprocess.cxx \
+	src/ek2/util/subprocess.h \
 	src/main.cxx
