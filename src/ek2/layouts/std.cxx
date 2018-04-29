@@ -16,6 +16,7 @@
 #include "ek2/util/error.h"
 
 #include <algorithm>
+#include <array>
 #include <cassert>
 #include <memory>
 #include <vector>
