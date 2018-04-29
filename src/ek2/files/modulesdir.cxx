@@ -12,6 +12,7 @@
 #include "ek2/util/directorystream.h"
 #include "ek2/util/error.h"
 
+#include <cerrno>
 #include <memory>
 
 ModulesDir::ModulesDir(std::shared_ptr<RelativePath> path)
