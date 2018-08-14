@@ -26,7 +26,7 @@ extern "C"
 #	include <getopt.h>
 };
 
-static const char* short_options = "ln:o:s:B:M:phV";
+static const char* short_options = "ln:o:s:B:M:phVe";
 static const struct option long_options[] = {
 	{ "list-kernels", no_argument, nullptr, 'l' },
 
@@ -42,6 +42,7 @@ static const struct option long_options[] = {
 
 	{ "help", no_argument, nullptr, 'h' },
 	{ "version", no_argument, nullptr, 'V' },
+	{ "ignore-module-dir", no_argument, nullptr, 'e' },
 
 	{ nullptr, no_argument, nullptr, 0 },
 };
@@ -53,6 +54,7 @@ static void print_help(std::ostream& out, const char* argv0)
 		"  -l, --list-kernels      list installed kernels\n"
 		"\n"
 		"Removal options:\n"
+		"  -e, --ignore-module-dir don't remove module dir\n"
 		"  -n, --keep-newest N     keep only N newest kernels\n"
 		"  -p, --pretend           print the plan but do not do anything\n"
 		"\n"
@@ -106,6 +108,7 @@ int sub_main(int argc, char* argv[])
 		"/lib/modules", // module_path
 
 		false, // pretend
+		false, // ignore module dir
 		0, // keep_newest
 	};
 
@@ -164,6 +167,9 @@ int sub_main(int argc, char* argv[])
 
 			case 'p':
 				opts.pretend = true;
+				break;
+			case 'e':
+				opts.ignore_module_dir = true;
 				break;
 
 			case 'h':

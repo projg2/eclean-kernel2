@@ -17,6 +17,7 @@ struct Options
 	std::string module_path;
 
 	bool pretend;
+	bool ignore_module_dir;
 	// newest kernels to keep, 0 to disable removing old
 	int keep_newest;
 };
