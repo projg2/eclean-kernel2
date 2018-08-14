@@ -100,6 +100,7 @@ bool StdLayout::find_kernels()
 {
 	const std::string& boot_path = opts_.boot_path;
 	const std::string& module_path = opts_.module_path;
+	const bool ignore_module_dir = opts_.ignore_module_dir;
 
 	std::unordered_map<std::string, FileSet> file_map;
 	typedef std::unordered_map<std::string,
@@ -107,31 +108,33 @@ bool StdLayout::find_kernels()
 		module_map_type;
 	module_map_type module_map;
 
-	// collect all moduledirs first
-	modules_dir_.reset(new DirectoryStream(module_path));
-	while (modules_dir_->read())
-	{
-		// skip ., .. and all hidden files
-		if (modules_dir_->filename()[0] == '.')
-			continue;
-		// skip non-directories and symlinks
-		if (!modules_dir_->is_regular_directory())
-			continue;
+	if (!ignore_module_dir) {
+		// collect all moduledirs first
+		modules_dir_.reset(new DirectoryStream(module_path));
+		while (modules_dir_->read())
+		{
+			// skip ., .. and all hidden files
+			if (modules_dir_->filename()[0] == '.')
+				continue;
+			// skip non-directories and symlinks
+			if (!modules_dir_->is_regular_directory())
+				continue;
 
-		std::shared_ptr<RelativePath> rpath{
-			new RelativePath(modules_dir_, modules_dir_->filename())};
-		std::shared_ptr<ModulesDir> f{
-			new ModulesDir(rpath)};
+			std::shared_ptr<RelativePath> rpath{
+				new RelativePath(modules_dir_, modules_dir_->filename())};
+			std::shared_ptr<ModulesDir> f{
+				new ModulesDir(rpath)};
 
-		std::shared_ptr<RelativePath> build_path{f->build_path()};
-		if (build_path)
-			module_map[f->filename()].push_back(
-					BuildDir::try_construct(build_path));
+			std::shared_ptr<RelativePath> build_path{f->build_path()};
+			if (build_path)
+				module_map[f->filename()].push_back(
+						BuildDir::try_construct(build_path));
 
-		// add moduledir after dependant dirs
-		// otherwise moduledir will be removed first and a later failure
-		// would make it impossible to find builddir again
-		module_map[f->filename()].push_back(f);
+			// add moduledir after dependant dirs
+			// otherwise moduledir will be removed first and a later failure
+			// would make it impossible to find builddir again
+			module_map[f->filename()].push_back(f);
+		}
 	}
 
 	// collect all kernel files from /boot
@@ -187,12 +190,14 @@ bool StdLayout::find_kernels()
 					fset.internal_version(internal_ver);
 
 					// associate the module dir
-					module_map_type::iterator mi
-						= module_map.find(internal_ver);
-					if (mi != module_map.end())
-					{
-						std::copy(mi->second.begin(), mi->second.end(),
-								std::back_inserter(fset.files()));
+					if (!ignore_module_dir) {
+						module_map_type::iterator mi
+							= module_map.find(internal_ver);
+						if (mi != module_map.end())
+						{
+							std::copy(mi->second.begin(), mi->second.end(),
+									std::back_inserter(fset.files()));
+						}
 					}
 				}
 				// otherwise, check if it matches the previous one
@@ -226,20 +231,23 @@ bool StdLayout::find_kernels()
 
 		// leave only unused moduledirs in modules map
 		// others should have been copied into kernels already
-		module_map.erase(kf.second.internal_version());
+		if(!ignore_module_dir)
+			module_map.erase(kf.second.internal_version());
 
 		// finally, move the FileSet to kernels
 		kernels_.push_back(std::move(kf.second));
 	}
 
-	// add orphaned moduledirs to the final list
-	for (std::pair<const std::string, std::vector<std::shared_ptr<File>>>& km : module_map)
-	{
-		FileSet module_set;
-		module_set.internal_version(km.first);
-		std::move(km.second.begin(), km.second.end(),
-				std::back_inserter(module_set.files()));
-		kernels_.push_back(std::move(module_set));
+	if(!ignore_module_dir) {
+		// add orphaned moduledirs to the final list
+		for (std::pair<const std::string, std::vector<std::shared_ptr<File>>>& km : module_map)
+		{
+			FileSet module_set;
+			module_set.internal_version(km.first);
+			std::move(km.second.begin(), km.second.end(),
+					std::back_inserter(module_set.files()));
+			kernels_.push_back(std::move(module_set));
+		}
 	}
 
 	return true;
