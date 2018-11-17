@@ -10,6 +10,7 @@
 #include "ek2/judges/keepnewest.h"
 
 #include <cassert>
+#include <algorithm>
 
 KeepNewest::KeepNewest(const Options& opts)
 	: Judge(opts)
@@ -26,12 +27,16 @@ void KeepNewest::judge(fileset_vote_map& fileset_map,
 			file_vote_map&) const
 {
 	assert(opts_.keep_newest >= 0);
-	int to_remove = fileset_map.size() - opts_.keep_newest;
+	auto is_for_removal = [](FileSetVoteSet& fsv)
+	{
+		return !fsv.votes.empty() && fsv.votes.back().remove;
+	};
+	int to_remove = fileset_map.size() - count_if(fileset_map.begin(), fileset_map.end(), is_for_removal) - opts_.keep_newest;
 
 	for (FileSetVoteSet& fsv : fileset_map)
 	{
 		// skip kernels already listed for removal
-		if (!fsv.votes.empty() && fsv.votes.back().remove)
+		if (is_for_removal(fsv))
 			continue;
 
 		if (to_remove > 0)
@@ -42,4 +47,5 @@ void KeepNewest::judge(fileset_vote_map& fileset_map,
 		else
 			fsv.votes.emplace_back(false, "one of the newest kernels");
 	}
+	assert(to_remove == 0);
 }
